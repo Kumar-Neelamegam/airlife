@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/grey"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="5">
+
+            <ImageView
+                android:layout_weight="1"
+                android:src="@drawable/logo"
+                android:layout_width="50dp"
+                android:layout_height="80dp"/>
+
+            <TextView
+                android:id="@+id/aqi_range"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:background="@color/white"
+                android:gravity="center"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="100 - 500"
+                tools:textColor="@color/scaleGood" />
+
+            <TextView
+                android:id="@+id/pollution_level"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textColor="@color/white"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+                tools:background="@color/scaleGood"
+                tools:text="@string/unhealthy_for_sensitive" />
+        </LinearLayout>
+
+        <View android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:background="@color/white"
+            />
+
+        <TextView
+            android:id="@+id/health_implications"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textColor="@color/white"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            tools:text="@string/good_health_implications" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

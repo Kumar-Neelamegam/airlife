@@ -1,0 +1,2 @@
+include ':airlife_mobile', ':airlife_wear'
+rootProject.name='Air Life'

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#2979FF</color>
+    <color name="colorPrimaryDark">#2C69CF</color>
+    <color name="colorAccent">#000</color>
+    <color name="blue_a400">#2979FF</color>
+    <color name="white">#fff</color>
+    <color name="black">#000</color>
+    <color name="ash">#C0B5B9</color>
+    <color name="green">#4CAF50</color>
+    <color name="red_a200">#F44336</color>
+
+    <color name="red">#FF0000</color>
+    <color name="orange">#FF9900</color>
+    <color name="purple">#512DA8</color>
+    <color name="lightPurple">#673AB7</color>
+    <color name="lightestPurple">#6E43D6</color>
+    <color name="transparent">#0FFF</color>
+    <color name="transparentDark">#4000</color>
+    <color name="transparentLight">#4FFF</color>
+    <color name="blue">#284CDC</color>
+    <color name="aqua">#009ba3</color>
+    <color name="lemonYellow">#fff44f</color>
+    <color name="grey">#999</color>
+    <color name="darkGrey">#363636</color>
+
+    <!--AQI Scale Colors-->
+    <color name="scaleGood">#009966</color>
+    <color name="scaleModerate">#FFDE33</color>
+    <color name="scaleUnhealthySensitive">#FF8821</color>
+    <color name="scaleUnhealthy">#CC0033</color>
+    <color name="scaleVeryUnhealthy">#660099</color>
+    <color name="scaleHazardous">#7E0023</color>
+
+    <!--Widget-->
+    <color name="widgetBackground">#9000</color>
+    <color name="widgetStroke">#00BCD4</color>
+</resources>

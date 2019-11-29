@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "at.jku.mobilecomputing.airlife"
+        minSdkVersion 19
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        debug {
+            buildConfigField 'String', "ApiKey", AirQualityMonitor_ApiToken
+            minifyEnabled false
+            debuggable true
+        }
+        release {
+            buildConfigField 'String', "ApiKey", AirQualityMonitor_ApiToken
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+compileOptions {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+}
+
+
+
+dependencies {
+    def lifecycle_version = "2.1.0"
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.0.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.google.android.material:material:1.2.0-alpha02'
+    implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    annotationProcessor "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    testImplementation "androidx.arch.core:core-testing:$lifecycle_version"
+
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    //Work Manager
+    implementation "android.arch.work:work-runtime:1.0.1"
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
+}
