@@ -11,10 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@color/blue_a400"
         android:gravity="center"
-        android:padding="15dp"
+        android:padding="10dp"
         android:textStyle="bold"
+        android:layout_marginTop="15dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:text="@string/app_name"
         android:textColor="@color/white" />
@@ -24,17 +24,27 @@
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_weight="1"
+        android:padding="90dp"
         android:layout_height="wrap_content"
         android:src="@drawable/logo" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:text="@string/quotes"
+        android:textStyle="bold"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
     <com.github.ybq.android.spinkit.SpinKitView
         android:id="@+id/progressBar"
         style="@style/SpinKitView.Large"
         android:layout_width="wrap_content"
+        android:layout_margin="15dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        app:SpinKit_Color="@color/blue_a400" />
+        android:layout_gravity="center"  />
 
     <TextView
         android:id="@+id/textView2"
@@ -42,10 +52,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="7dp"
-        android:background="@color/blue_a400"
+        android:padding="5dp"
         android:gravity="center"
-        android:text="Institute for Telecooperation\nJKU, Linz"
+        android:text="@string/footer"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 </LinearLayout>

@@ -3,7 +3,19 @@
 
     <color name="colorPrimary">#2979FF</color>
     <color name="colorPrimaryDark">#2C69CF</color>
-    <color name="colorAccent">#000</color>
+    <color name="colorAccent">#30336b</color>
+
+    <color name="colorthemeLightPrimary">#2979FF</color>
+    <color name="colorthemeLightDark">#2C69CF</color>
+    <color name="colorthemeLightAccent">#30336b</color>
+
+    <color name="colorthemeDarkPrimary">#2979FF</color>
+    <color name="colorthemeDarkDark">#2C69CF</color>
+    <color name="colorthemeDarkAccent">#30336b</color>
+
+    <color name="lightcommonaccent">#0097e6</color>
+    <color name="darkcommonaccent">#192a56</color>
+
     <color name="blue_a400">#2979FF</color>
     <color name="white">#fff</color>
     <color name="black">#000</color>
@@ -22,6 +34,7 @@
     <color name="blue">#284CDC</color>
     <color name="aqua">#009ba3</color>
     <color name="lemonYellow">#fff44f</color>
+    <color name="lemonquince">#f0932b</color>
     <color name="grey">#999</color>
     <color name="darkGrey">#363636</color>
 

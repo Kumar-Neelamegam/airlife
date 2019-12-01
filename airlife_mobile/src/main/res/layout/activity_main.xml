@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
 
+    <!-- first layout -->
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -147,8 +148,10 @@
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- second layout -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -265,15 +268,17 @@
                 android:overScrollMode="never" />
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/attribution_title"
                 style="@style/TextAppearanceHeading"
                 android:layout_width="match_parent"
+                android:layout_below="@id/pollutants_recycler_view"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
                 android:text="@string/attribution"
                 android:textAlignment="textStart" />
 
-            <TextView
+            <TextView   android:visibility="gone"
                 android:id="@+id/attribution_text_view"
                 style="@style/TextAppearance"
                 android:layout_width="match_parent"

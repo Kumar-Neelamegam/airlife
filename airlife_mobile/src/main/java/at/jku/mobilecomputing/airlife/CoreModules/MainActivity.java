@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -84,19 +85,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setUpTheme();
+        setContentView(R.layout.activity_main);
+        init();
+        getData();
+        checkGPSAndRequestLocation();
+        scheduleWidgetUpdater();
+      /*  try {
+            FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                    .addOnCompleteListener(task -> Log.d("FCM", "Subscribed to \"weather\""));
+        } catch (Exception e) {
+            Log.e("FCM", "Unable to add FCM topic");
+        }*/
+    }
+
+    private void setUpTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
         if (sharedPrefUtils.getAppInstallTime() == 0)
             sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
         if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
         else setTheme(R.style.AppTheme_Light);
-        setContentView(R.layout.activity_main);
-        init();
+    }
+
+    private void getData() {
         aqiViewModel = ViewModelProviders.of(this).get(AqiViewModel.class);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.
-                PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(20 * 1000);
         locationCallback = new LocationCallback() {
             @Override
@@ -112,14 +128,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         };
-        checkGPSAndRequestLocation();
-        scheduleWidgetUpdater();
-      /*  try {
-            FirebaseMessaging.getInstance().subscribeToTopic("weather")
-                    .addOnCompleteListener(task -> Log.d("FCM", "Subscribed to \"weather\""));
-        } catch (Exception e) {
-            Log.e("FCM", "Unable to add FCM topic");
-        }*/
     }
 
     private void checkGPSAndRequestLocation() {
@@ -202,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setAqiScaleGroup() {
         int aqi = data.getAqi();
-        TextView aqiScaleText;
+        ImageView aqiScaleText;
         if (aqi >= 0 && aqi <= 50) aqiScaleText = findViewById(R.id.scaleGood);
         else if (aqi >= 51 && aqi <= 100) aqiScaleText = findViewById(R.id.scaleModerate);
         else if (aqi >= 101 && aqi <= 150)
@@ -211,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if (aqi >= 201 && aqi <= 300) aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
         else if (aqi >= 301) aqiScaleText = findViewById(R.id.scaleHazardous);
         else aqiScaleText = findViewById(R.id.scaleGood);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
         }
@@ -321,7 +330,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         aqiViewModel.getStatus().observe(MainActivity.this, status -> {
             if (status != null) {
                 if (status == Status.FETCHING) {
-                    showDialog("Getting data based on network...");
+                    showDialog("Loading Information..Please wait..");
                 } else dismissDialog();
             }
         });
@@ -343,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (waqi.getWind() != null)
                     windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
                 locationTextView.setText(data.getCity().getName());
-                setupAttributions(data);
+               // setupAttributions(data);
                 addPollutantsToList(data.getWaqi());
                 pollutantsAdapter.notifyDataSetChanged();
                 updateWidget();

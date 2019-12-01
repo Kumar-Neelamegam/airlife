@@ -27,7 +27,7 @@ public class Data {
     @SerializedName("dominentpol")
     @Expose
     private String dominentpol;
-    @SerializedName("waqi")
+    @SerializedName("iaqi")
     @Expose
     private WAQI waqi;
     @SerializedName("time")
