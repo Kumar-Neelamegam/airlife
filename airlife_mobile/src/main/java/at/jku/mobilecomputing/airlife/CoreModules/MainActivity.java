@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private Location latestLocation;
+    AppCompatImageView circleBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         humidityTextView = findViewById(R.id.humidity_text_view);
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
+        circleBackground=findViewById(R.id.aqi_background);
         setupRecyclerView();
         setupClickListeners();
     }
@@ -211,18 +214,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setAqiScaleGroup() {
         int aqi = data.getAqi();
         ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) aqiScaleText = findViewById(R.id.scaleGood);
-        else if (aqi >= 51 && aqi <= 100) aqiScaleText = findViewById(R.id.scaleModerate);
-        else if (aqi >= 101 && aqi <= 150)
+        if (aqi >= 0 && aqi <= 50) {
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setImageResource(R.drawable.circle_good);
+        }
+        else if (aqi >= 51 && aqi <= 100){
+            aqiScaleText = findViewById(R.id.scaleModerate);
+            circleBackground.setImageResource(R.drawable.circle_moderate);
+        } else if (aqi >= 101 && aqi <= 150){
             aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-        else if (aqi >= 151 && aqi <= 200) aqiScaleText = findViewById(R.id.scaleUnhealthy);
-        else if (aqi >= 201 && aqi <= 300) aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-        else if (aqi >= 301) aqiScaleText = findViewById(R.id.scaleHazardous);
-        else aqiScaleText = findViewById(R.id.scaleGood);
-
+            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
+        } else if (aqi >= 151 && aqi <= 200){
+            aqiScaleText = findViewById(R.id.scaleUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_unhealthy);
+        } else if (aqi >= 201 && aqi <= 300){
+            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
+        } else if (aqi >= 301){
+            aqiScaleText = findViewById(R.id.scaleHazardous);
+            circleBackground.setImageResource(R.drawable.circle_harzardous);
+        } else{
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setBackgroundResource(R.drawable.circle_good);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
         }
+
     }
 
     private void showDialog(String s) {
