@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import androidx.work.WorkManager;
@@ -30,26 +31,26 @@ public class ALWidget extends AppWidgetProvider {
         int colorId = -1;
         if (aqi >= 0 && aqi <= 50) {
             airQuality = context.getString(R.string.good);
-            colorId = context.getResources().getColor(R.color.scaleGood);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_good);
         } else if (aqi >= 51 && aqi <= 100) {
             airQuality = context.getString(R.string.moderate);
-            colorId = context.getResources().getColor(R.color.scaleModerate);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_moderate);
         } else if (aqi >= 101 && aqi <= 150) {
             airQuality = context.getString(R.string.unhealthy);
-            colorId = context.getResources().getColor(R.color.scaleUnhealthySensitive);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_unhealthysg);
         } else if (aqi >= 151 && aqi <= 200) {
             airQuality = context.getString(R.string.unhealthy);
-            colorId = context.getResources().getColor(R.color.scaleUnhealthy);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_unhealthy);
         } else if (aqi >= 201 && aqi <= 300) {
             airQuality = context.getString(R.string.very_unhealthy);
-            colorId = context.getResources().getColor(R.color.scaleVeryUnhealthy);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_veryunhealthy);
         } else if (aqi >= 301) {
             airQuality = context.getString(R.string.hazardous);
-            colorId = context.getResources().getColor(R.color.scaleHazardous);
+            views.setImageViewResource(R.id.widget_background, R.drawable.widget_circle_harzardous);
         }
         views.setTextViewText(R.id.widget_air_quality_text, airQuality);
-        views.setTextColor(R.id.widget_air_quality_text, context.getResources().getColor(R.color.grey));
-
+        views.setTextColor(R.id.widget_air_quality_text, context.getResources().getColor(R.color.white));
+        views.setTextViewText(R.id.temperature_text_view, SharedPrefUtils.getInstance(context).getLatestTemp());
         Intent intent = new Intent(context, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         views.setOnClickPendingIntent(R.id.widget_background, pendingIntent);
