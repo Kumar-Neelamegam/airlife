@@ -8,7 +8,6 @@ import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 public class Common {
 
     public static void setUpTheme(SharedPrefUtils sharedPrefUtils, Context ctx) {
-        sharedPrefUtils = SharedPrefUtils.getInstance(ctx);
         if (sharedPrefUtils.getAppInstallTime() == 0)
             sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
         if (sharedPrefUtils.isDarkMode()) ctx.setTheme(R.style.AppTheme_Dark);
