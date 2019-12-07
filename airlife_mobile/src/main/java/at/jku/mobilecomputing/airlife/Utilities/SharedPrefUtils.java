@@ -3,10 +3,14 @@ package at.jku.mobilecomputing.airlife.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Set;
+
+import at.jku.mobilecomputing.airlife.DomainObjects.Data;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class SharedPrefUtils {
-    private static final String SHARED_PREF_NAME = "location";
+    private static final String SHARED_PREF_NAME = "airlifeshared";
     private static SharedPrefUtils INSTANCE = null;
     private SharedPreferences preferences;
 
@@ -32,6 +36,19 @@ public class SharedPrefUtils {
         return preferences.getString("aqi", "");
     }
 
+
+    public void saveLatestTemp(String temperature) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("temperature", temperature);
+        editor.apply();
+    }
+
+    public String getLatestTemp() {
+        return preferences.getString("temperature", "");
+    }
+
+
+
     public void isDarkMode(Boolean b) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("darkMode", b);
@@ -46,10 +63,6 @@ public class SharedPrefUtils {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean("rateCard", b);
         editor.apply();
-    }
-
-    public Boolean rateCardDone() {
-        return preferences.getBoolean("rateCard", false);
     }
 
     public void setAppInstallTime(Long time) {

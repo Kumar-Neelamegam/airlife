@@ -53,7 +53,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.good);
                 healthImplicationTextView.setText(R.string.good_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_good));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_good));
                 cardView.setCardBackgroundColor(color);
                 break;
             case MODERATE:
@@ -63,7 +63,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.moderate);
                 healthImplicationTextView.setText(R.string.moderate_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_moderate));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_moderate));
                 cardView.setCardBackgroundColor(color);
                 break;
             case UNHEALTHY_FOR_SENSITIVE:
@@ -73,7 +73,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.unhealthy_for_sensitive);
                 healthImplicationTextView.setText(R.string.unhealthy_for_sensitive_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_sensitive_unhealthy));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_sensitive_unhealthy));
                 cardView.setCardBackgroundColor(color);
                 break;
             case UNHEALTHY:
@@ -83,7 +83,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.unhealthy);
                 healthImplicationTextView.setText(R.string.unhealthy_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_unhealthy));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_unhealthy));
                 cardView.setCardBackgroundColor(color);
                 break;
             case VERY_UNHEALTHY:
@@ -93,7 +93,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.very_unhealthy);
                 healthImplicationTextView.setText(R.string.very_unhealthy_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_very_unhealthy));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_very_unhealthy));
                 cardView.setCardBackgroundColor(color);
                 break;
             case HAZARDOUS:
@@ -103,7 +103,7 @@ public class InfoDialog extends Dialog {
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.hazardous);
                 healthImplicationTextView.setText(R.string.hazardous_health_implications);
-                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.status_hazardous));
+                imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_hazardous));
                 cardView.setCardBackgroundColor(color);
                 break;
         }

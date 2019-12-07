@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
+import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
 import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
@@ -81,30 +83,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
     private Location latestLocation;
+    AppCompatImageView circleBackground;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setUpTheme();
-        setContentView(R.layout.activity_main);
-        init();
-        getData();
-        checkGPSAndRequestLocation();
-        scheduleWidgetUpdater();
-      /*  try {
-            FirebaseMessaging.getInstance().subscribeToTopic("weather")
-                    .addOnCompleteListener(task -> Log.d("FCM", "Subscribed to \"weather\""));
+        try {
+            sharedPrefUtils = SharedPrefUtils.getInstance(this);
+            Common.setUpTheme(sharedPrefUtils, getApplicationContext());
+            setContentView(R.layout.activity_main);
+            init();
+            getData();
+            checkGPSAndRequestLocation();
+            scheduleWidgetUpdater();
         } catch (Exception e) {
-            Log.e("FCM", "Unable to add FCM topic");
-        }*/
-    }
-
-    private void setUpTheme() {
-        sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.getAppInstallTime() == 0)
-            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
-        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
-        else setTheme(R.style.AppTheme_Light);
+            e.printStackTrace();
+        }
     }
 
     private void getData() {
@@ -123,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
                         latestLocation = location;
-                        getAqiData(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+                        getAqiDataFromLatitudeLongitude(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
                     }
                 }
             }
@@ -167,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         humidityTextView = findViewById(R.id.humidity_text_view);
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
+        circleBackground=findViewById(R.id.aqi_background);
         setupRecyclerView();
         setupClickListeners();
     }
@@ -185,44 +180,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pollutantsRecyclerView = findViewById(R.id.pollutants_recycler_view);
         pollutantsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pollutantsRecyclerView.setHasFixedSize(true);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(),
-                DividerItemDecoration.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(),DividerItemDecoration.VERTICAL);
         pollutantsRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
     private void addPollutantsToList(WAQI waqi) {
-        pollutantsList.clear();
-        if (waqi.getCo() != null)
-            pollutantsList.add(new Pollutant("Carbon Monoxide - AQI", waqi.getCo().getV()));
-        if (waqi.getNo2() != null)
-            pollutantsList.add(new Pollutant("Nitrous Dioxide - AQI", waqi.getNo2().getV()));
-        if (waqi.getO3() != null)
-            pollutantsList.add(new Pollutant("Ozone - AQI", waqi.getO3().getV()));
-        if (waqi.getPm2_5() != null)
-            pollutantsList.add(new Pollutant("PM 2.5 - AQI", waqi.getPm2_5().getV()));
-        if (waqi.getPm10() != null)
-            pollutantsList.add(new Pollutant("PM 10 - AQI", waqi.getPm10().getV()));
-        if (waqi.getSo2() != null)
-            pollutantsList.add(new Pollutant("Sulfur Dioxide - AQI", waqi.getSo2().getV()));
-        pollutantsAdapter = new PollutantsAdapter(pollutantsList);
-        pollutantsRecyclerView.setAdapter(pollutantsAdapter);
+        try {
+            pollutantsList.clear();
+            if (waqi.getCo() != null)
+                pollutantsList.add(new Pollutant("Carbon Monoxide - AQI", waqi.getCo().getV()));
+            if (waqi.getNo2() != null)
+                pollutantsList.add(new Pollutant("Nitrous Dioxide - AQI", waqi.getNo2().getV()));
+            if (waqi.getO3() != null)
+                pollutantsList.add(new Pollutant("Ozone - AQI", waqi.getO3().getV()));
+            if (waqi.getPm2_5() != null)
+                pollutantsList.add(new Pollutant("PM 2.5 - AQI", waqi.getPm2_5().getV()));
+            if (waqi.getPm10() != null)
+                pollutantsList.add(new Pollutant("PM 10 - AQI", waqi.getPm10().getV()));
+            if (waqi.getSo2() != null)
+                pollutantsList.add(new Pollutant("Sulfur Dioxide - AQI", waqi.getSo2().getV()));
+            pollutantsAdapter = new PollutantsAdapter(pollutantsList);
+            pollutantsRecyclerView.setAdapter(pollutantsAdapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setAqiScaleGroup() {
         int aqi = data.getAqi();
         ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) aqiScaleText = findViewById(R.id.scaleGood);
-        else if (aqi >= 51 && aqi <= 100) aqiScaleText = findViewById(R.id.scaleModerate);
-        else if (aqi >= 101 && aqi <= 150)
+        if (aqi >= 0 && aqi <= 50) {
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setImageResource(R.drawable.circle_good);
+        }
+        else if (aqi >= 51 && aqi <= 100){
+            aqiScaleText = findViewById(R.id.scaleModerate);
+            circleBackground.setImageResource(R.drawable.circle_moderate);
+        } else if (aqi >= 101 && aqi <= 150){
             aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-        else if (aqi >= 151 && aqi <= 200) aqiScaleText = findViewById(R.id.scaleUnhealthy);
-        else if (aqi >= 201 && aqi <= 300) aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-        else if (aqi >= 301) aqiScaleText = findViewById(R.id.scaleHazardous);
-        else aqiScaleText = findViewById(R.id.scaleGood);
-
+            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
+        } else if (aqi >= 151 && aqi <= 200){
+            aqiScaleText = findViewById(R.id.scaleUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_unhealthy);
+        } else if (aqi >= 201 && aqi <= 300){
+            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
+        } else if (aqi >= 301){
+            aqiScaleText = findViewById(R.id.scaleHazardous);
+            circleBackground.setImageResource(R.drawable.circle_harzardous);
+        } else{
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setBackgroundResource(R.drawable.circle_good);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
         }
+
     }
 
     private void showDialog(String s) {
@@ -291,73 +304,87 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void getAqiData(String latitude, String longitude) {
-        String geo = "geo:" + latitude + ";" + longitude;
-        aqiViewModel.getStatus().observe(MainActivity.this, status -> {
-            if (status != null) {
-                if (status == Status.FETCHING) {
-                    showDialog("Getting data from nearest station...");
-                } else dismissDialog();
-            }
-        });
-        aqiViewModel.getGPSApiResponse(geo).observe(MainActivity.this, apiResponse -> {
-            if (apiResponse != null) {
-                Log.e("api", String.valueOf(apiResponse));
-                data = apiResponse.getData();
-                aqiTextView.setText(String.valueOf(data.getAqi()));
-                //TODO: Find better implementation
-                sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                setAqiScaleGroup();
-                WAQI waqi = data.getWaqi();
-                if (waqi.getTemperature() != null)
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                if (waqi.getPressure() != null)
-                    pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                if (waqi.getHumidity() != null)
-                    humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                if (waqi.getWind() != null)
-                    windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
-                locationTextView.setText(data.getCity().getName());
-                setupAttributions(data);
-                addPollutantsToList(data.getWaqi());
-                pollutantsAdapter.notifyDataSetChanged();
-                updateWidget();
-            }
-        });
+    private void getAqiDataFromLatitudeLongitude(String latitude, String longitude) {
+        try {
+            String geo = "geo:" + latitude + ";" + longitude;
+            Log.e("Geo information:", geo);
+            aqiViewModel.getStatus().observe(MainActivity.this, status -> {
+                if (status != null) {
+                    if (status == Status.FETCHING) {
+                        showDialog("Loading data from nearest station...");
+                    } else dismissDialog();
+                }
+            });
+            aqiViewModel.getGPSApiResponse(geo).observe(MainActivity.this, apiResponse -> {
+                if (apiResponse != null) {
+                    try {
+                        Log.e("api", String.valueOf(apiResponse));
+                        data = apiResponse.getData();
+                        aqiTextView.setText(String.valueOf(data.getAqi()));
+                        //TODO: Find better implementation
+                        sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
+                        setAqiScaleGroup();
+                        WAQI waqi = data.getWaqi();
+                        if (waqi.getTemperature() != null)
+                            sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                            temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                        if (waqi.getPressure() != null)
+                            pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
+                        if (waqi.getHumidity() != null)
+                            humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
+                        if (waqi.getWind() != null)
+                            windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                        locationTextView.setText(data.getCity().getName());
+                        setupAttributions(data);
+                        addPollutantsToList(data.getWaqi());
+                        pollutantsAdapter.notifyDataSetChanged();
+                        updateWidget();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void getAqiData() {
-        aqiViewModel.getStatus().observe(MainActivity.this, status -> {
-            if (status != null) {
-                if (status == Status.FETCHING) {
-                    showDialog("Loading Information..Please wait..");
-                } else dismissDialog();
-            }
-        });
-        aqiViewModel.getApiResponse().observe(MainActivity.this, apiResponse -> {
-            if (apiResponse != null) {
-                Log.d("api", String.valueOf(apiResponse));
-                data = apiResponse.getData();
-                aqiTextView.setText(String.valueOf(data.getAqi()));
-                //TODO: Find better implementation
-                sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                setAqiScaleGroup();
-                WAQI waqi = data.getWaqi();
-                if (waqi.getTemperature() != null)
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                if (waqi.getPressure() != null)
-                    pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                if (waqi.getHumidity() != null)
-                    humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                if (waqi.getWind() != null)
-                    windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
-                locationTextView.setText(data.getCity().getName());
-               // setupAttributions(data);
-                addPollutantsToList(data.getWaqi());
-                pollutantsAdapter.notifyDataSetChanged();
-                updateWidget();
-            }
-        });
+        try {
+            aqiViewModel.getStatus().observe(MainActivity.this, status -> {
+                if (status != null) {
+                    if (status == Status.FETCHING) {
+                        showDialog("Loading Information..Please wait..");
+                    } else dismissDialog();
+                }
+            });
+            aqiViewModel.getApiResponse().observe(MainActivity.this, apiResponse -> {
+                if (apiResponse != null) {
+                    Log.d("api", String.valueOf(apiResponse));
+                    data = apiResponse.getData();
+                    aqiTextView.setText(String.valueOf(data.getAqi()));
+                    //TODO: Find better implementation
+                    sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
+                    setAqiScaleGroup();
+                    WAQI waqi = data.getWaqi();
+                    if (waqi.getTemperature() != null)
+                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                    if (waqi.getPressure() != null)
+                        pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
+                    if (waqi.getHumidity() != null)
+                        humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
+                    if (waqi.getWind() != null)
+                        windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                    locationTextView.setText(data.getCity().getName());
+                   // setupAttributions(data);
+                    addPollutantsToList(data.getWaqi());
+                    pollutantsAdapter.notifyDataSetChanged();
+                    updateWidget();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupAttributions(Data data) {

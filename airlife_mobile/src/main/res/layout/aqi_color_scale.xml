@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_good" />
+                android:background="@drawable/ic_smile_good" />
 
             <ImageView
                 android:id="@+id/scaleModerate"
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_moderate" />
+                android:background="@drawable/ic_smile_moderate" />
 
             <ImageView
                 android:id="@+id/scaleUnhealthySensitive"
@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_sensitive_unhealthy" />
+                android:background="@drawable/ic_smile_sensitive_unhealthy" />
 
             <ImageView
                 android:id="@+id/scaleUnhealthy"
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_unhealthy" />
+                android:background="@drawable/ic_smile_unhealthy" />
 
             <ImageView
                 android:id="@+id/scaleVeryUnhealthy"
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_very_unhealthy" />
+                android:background="@drawable/ic_smile_very_unhealthy" />
 
             <ImageView
                 android:id="@+id/scaleHazardous"
@@ -67,10 +67,16 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/status_hazardous" />
+                android:background="@drawable/ic_smile_hazardous" />
 
         </LinearLayout>
 
+        <View android:layout_width="match_parent"
+            android:layout_height="0.8dp"
+            android:background="#000"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            />
         <!-- range -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -121,6 +127,7 @@
                 android:text="@string/hazardous_range" />
 
         </LinearLayout>
+
 
         <!-- labels -->
         <LinearLayout
