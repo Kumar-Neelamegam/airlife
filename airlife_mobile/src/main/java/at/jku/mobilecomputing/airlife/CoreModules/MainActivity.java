@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
+import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
 import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setUpTheme();
+        Common.setUpTheme(sharedPrefUtils, this);
         setContentView(R.layout.activity_main);
         init();
         getData();
@@ -99,14 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (Exception e) {
             Log.e("FCM", "Unable to add FCM topic");
         }*/
-    }
-
-    private void setUpTheme() {
-        sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.getAppInstallTime() == 0)
-            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
-        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
-        else setTheme(R.style.AppTheme_Light);
     }
 
     private void getData() {
