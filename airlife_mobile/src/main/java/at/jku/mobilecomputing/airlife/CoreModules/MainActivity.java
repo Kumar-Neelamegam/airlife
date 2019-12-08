@@ -89,8 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            sharedPrefUtils = SharedPrefUtils.getInstance(this);
-            Common.setUpTheme(sharedPrefUtils, getApplicationContext());
+            setUPTheme();
             setContentView(R.layout.activity_main);
             init();
             getData();
@@ -99,6 +98,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setUPTheme()
+    {
+        sharedPrefUtils = SharedPrefUtils.getInstance(this);
+        if (sharedPrefUtils.getAppInstallTime() == 0)
+            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
+        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
+        else setTheme(R.style.AppTheme_Light);
     }
 
     private void getData() {

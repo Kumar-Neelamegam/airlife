@@ -11,10 +11,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
 
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.Wave;
+import com.siimkinks.sqlitemagic.SqliteMagic;
 
 import at.jku.mobilecomputing.airlife.BuildConfig;
 import at.jku.mobilecomputing.airlife.R;
@@ -70,7 +72,16 @@ public class SplashActivity  extends CoreActivity {
             }
         }, SPLASH_DURATION);
 
+        InitSQLiteDB();
+
     }
+
+    private void InitSQLiteDB() {
+        SqliteMagic.builder(getApplication())
+                .sqliteFactory(new FrameworkSQLiteOpenHelperFactory())
+                .openDefaultConnection();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
