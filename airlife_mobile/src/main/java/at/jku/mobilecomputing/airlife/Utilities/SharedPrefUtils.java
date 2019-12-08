@@ -28,12 +28,12 @@ public class SharedPrefUtils {
 
     public void saveLatestAQI(String location) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("aqi", location);
+        editor.putString("Aqi", location);
         editor.apply();
     }
 
     public String getLatestAQI() {
-        return preferences.getString("aqi", "");
+        return preferences.getString("Aqi", "");
     }
 
 

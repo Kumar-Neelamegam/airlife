@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +28,7 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
@@ -40,6 +40,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import net.redwarp.library.database.DatabaseHelper;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -48,10 +51,13 @@ import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
+import at.jku.mobilecomputing.airlife.Database.AqiDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
+import at.jku.mobilecomputing.airlife.NetworkUtils.APIInterface;
+import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
@@ -60,8 +66,13 @@ import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 import at.jku.mobilecomputing.airlife.Widget.DataUpdateWidgetWorker;
 
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.GOOD;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.HAZARDOUS;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.MODERATE;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.UNHEALTHY;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.UNHEALTHY_FOR_SENSITIVE;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.VERY_UNHEALTHY;
 import static at.jku.mobilecomputing.airlife.Utilities.GPSUtils.GPS_REQUEST;
-import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.*;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Views
@@ -85,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Location latestLocation;
     AppCompatImageView circleBackground;
 
+    String apiFullResponse;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +108,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             getData();
             checkGPSAndRequestLocation();
             scheduleWidgetUpdater();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void InserttoDB(Data data, String latitude, String longitude) {
+        try {
+            DatabaseHelper helper = new DatabaseHelper(this);
+
+            AqiDataSet aqiDataSet=new AqiDataSet();
+            aqiDataSet.setFullResponse(apiFullResponse);
+            aqiDataSet.setAirquality(data.getAqi());
+            aqiDataSet.setQualityscale(Common.getscalefromquality(data.getAqi(), this));
+            aqiDataSet.setCurrentLatitude(latitude);
+            aqiDataSet.setCurrentLongitude(longitude);
+            aqiDataSet.setCity(data.getCity().getName());
+            aqiDataSet.setAddress(data.getCity().getUrl());
+            aqiDataSet.setDatetime(String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
+            aqiDataSet.setTemperature(getString(R.string.temperature_unit_celsius,data.getWaqi().getTemperature().getV()));
+            aqiDataSet.setHumidity(getString(R.string.humidity_unit,data.getWaqi().getHumidity().getV()));
+            aqiDataSet.setPressure(getString(R.string.pressure_unit,data.getWaqi().getPressure().getV()));
+            aqiDataSet.setWind(getString(R.string.wind_unit,data.getWaqi().getWind().getV()));
+            helper.save(aqiDataSet);
+
+            List<AqiDataSet> allPojos = helper.getAll(AqiDataSet.class);
+            for (AqiDataSet allPojo : allPojos) {
+                Log.e("Inserted Data:", String.valueOf(allPojo.getAirquality()));
+            }
+            long count = helper.getCount(AqiDataSet.class);
+            Log.e("Total count:", String.valueOf(count));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -214,38 +257,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void setAqiScaleGroup() {
-        int aqi = data.getAqi();
-        ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) {
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setImageResource(R.drawable.circle_good);
-        }
-        else if (aqi >= 51 && aqi <= 100){
-            aqiScaleText = findViewById(R.id.scaleModerate);
-            circleBackground.setImageResource(R.drawable.circle_moderate);
-        } else if (aqi >= 101 && aqi <= 150){
-            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
-        } else if (aqi >= 151 && aqi <= 200){
-            aqiScaleText = findViewById(R.id.scaleUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_unhealthy);
-        } else if (aqi >= 201 && aqi <= 300){
-            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
-        } else if (aqi >= 301){
-            aqiScaleText = findViewById(R.id.scaleHazardous);
-            circleBackground.setImageResource(R.drawable.circle_harzardous);
-        } else{
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setBackgroundResource(R.drawable.circle_good);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
-        }
-
-    }
-
     private void showDialog(String s) {
         RetrofitHelper.getInstance().showProgressDialog(this, s);
     }
@@ -326,12 +337,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             aqiViewModel.getGPSApiResponse(geo).observe(MainActivity.this, apiResponse -> {
                 if (apiResponse != null) {
                     try {
+                        apiFullResponse=String.valueOf(apiResponse);
                         Log.e("api", String.valueOf(apiResponse));
                         data = apiResponse.getData();
                         aqiTextView.setText(String.valueOf(data.getAqi()));
                         //TODO: Find better implementation
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                        setAqiScaleGroup();
+                        setAQIScaleGroup();
                         WAQI waqi = data.getWaqi();
                         if (waqi.getTemperature() != null)
                             sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
@@ -347,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         addPollutantsToList(data.getWaqi());
                         pollutantsAdapter.notifyDataSetChanged();
                         updateWidget();
+                        InserttoDB(data, latitude, longitude);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -354,6 +367,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             });
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setAQIScaleGroup() {
+        int aqi = data.getAqi();
+        ImageView aqiScaleText;
+        if (aqi >= 0 && aqi <= 50) {
+            aqiScaleText =findViewById(R.id.scaleGood);
+            circleBackground.setImageResource(R.drawable.circle_good);
+        }
+        else if (aqi >= 51 && aqi <= 100){
+            aqiScaleText = findViewById(R.id.scaleModerate);
+            circleBackground.setImageResource(R.drawable.circle_moderate);
+        } else if (aqi >= 101 && aqi <= 150){
+            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
+            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
+        } else if (aqi >= 151 && aqi <= 200){
+            aqiScaleText = findViewById(R.id.scaleUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_unhealthy);
+        } else if (aqi >= 201 && aqi <= 300){
+            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
+        } else if (aqi >= 301){
+            aqiScaleText = findViewById(R.id.scaleHazardous);
+            circleBackground.setImageResource(R.drawable.circle_harzardous);
+        } else{
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setBackgroundResource(R.drawable.circle_good);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
         }
     }
 
@@ -373,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     aqiTextView.setText(String.valueOf(data.getAqi()));
                     //TODO: Find better implementation
                     sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                    setAqiScaleGroup();
+                    setAQIScaleGroup();
                     WAQI waqi = data.getWaqi();
                     if (waqi.getTemperature() != null)
                         temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
@@ -388,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     addPollutantsToList(data.getWaqi());
                     pollutantsAdapter.notifyDataSetChanged();
                     updateWidget();
+                    InserttoDB(data, "0", "0");
                 }
             });
         } catch (Exception e) {
