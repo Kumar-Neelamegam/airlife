@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -95,6 +96,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationCallback locationCallback;
     private Location latestLocation;
     AppCompatImageView circleBackground;
+    AppCompatImageView makeFavourite;
+    AppCompatImageView listFavourite;
+    AppCompatImageView predictMachineLearning;
 
     String apiFullResponse;
 
@@ -213,6 +217,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
         circleBackground=findViewById(R.id.aqi_background);
+
+        makeFavourite=findViewById(R.id.imgvw_favourite);
+        listFavourite=findViewById(R.id.imgvw_favlist);
+        predictMachineLearning=findViewById(R.id.imgvw_machinelarning);
+
         setupRecyclerView();
         setupClickListeners();
     }
@@ -225,6 +234,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.scaleVeryUnhealthy).setOnClickListener(this);
         findViewById(R.id.scaleHazardous).setOnClickListener(this);
         findViewById(R.id.btnDarkMode).setOnClickListener(this);
+
+        findViewById(R.id.imgvw_favourite).setOnClickListener(this);
+        findViewById(R.id.imgvw_favlist).setOnClickListener(this);
+        findViewById(R.id.imgvw_machinelarning).setOnClickListener(this);
+
     }
 
     private void setupRecyclerView() {
@@ -500,6 +514,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btnDarkMode:
                 sharedPrefUtils.isDarkMode(!sharedPrefUtils.isDarkMode());
                 recreate();
+                break;
+            case R.id.imgvw_favourite:
+                Toast.makeText(this, "Marked as favourite location..", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.imgvw_favlist:
+                startActivity(new Intent(this,ListFavActivity.class));
+                break;
+            case R.id.imgvw_machinelarning:
+                startActivity(new Intent(this,PredictionActivity.class));
                 break;
             default:
                 break;

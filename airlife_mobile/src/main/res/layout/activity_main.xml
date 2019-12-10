@@ -24,11 +24,13 @@
                 android:layout_height="match_parent">
 
                 <LinearLayout
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/aqi_background"
-                    android:orientation="vertical"
+                    android:id="@+id/options_menu"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/aqi_background">
+
                     <ImageView
                         android:id="@+id/btnDarkMode"
                         android:layout_width="wrap_content"
@@ -36,13 +38,14 @@
                         android:layout_marginEnd="24dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
-                        android:padding="10dp"
                         android:focusable="true"
+                        android:padding="10dp"
                         android:src="@drawable/ic_dark_mode"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/aqi_background" />
 
                     <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imgvw_favourite"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
@@ -55,14 +58,28 @@
                         app:layout_constraintTop_toTopOf="@id/aqi_background" />
 
                     <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imgvw_favlist"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="15dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
-                        android:padding="10dp"
                         android:focusable="true"
+                        android:padding="10dp"
                         android:src="@drawable/ic_listview"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/aqi_background" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imgvw_machinelarning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_neural"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/aqi_background" />
 
@@ -156,9 +173,9 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="15dp"
                     android:gravity="center"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -176,7 +193,6 @@
                         android:id="@+id/location_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         tools:text="@string/place_holder" />
@@ -303,17 +319,17 @@
                 android:overScrollMode="never" />
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/attribution_title"
                 style="@style/TextAppearanceHeading"
                 android:layout_width="match_parent"
-                android:layout_below="@id/pollutants_recycler_view"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/pollutants_recycler_view"
                 android:layout_margin="16dp"
                 android:text="@string/attribution"
-                android:textAlignment="textStart" />
+                android:textAlignment="textStart"
+                android:visibility="gone" />
 
-            <TextView   android:visibility="gone"
+            <TextView
                 android:id="@+id/attribution_text_view"
                 style="@style/TextAppearance"
                 android:layout_width="match_parent"
@@ -323,7 +339,8 @@
                 android:layout_marginRight="16dp"
                 android:text="@string/place_holder"
                 android:textAlignment="textStart"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:visibility="gone" />
 
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
