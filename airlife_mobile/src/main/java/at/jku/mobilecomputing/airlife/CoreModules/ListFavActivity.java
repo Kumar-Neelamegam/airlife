@@ -103,6 +103,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         setUPTheme();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle("Air Life - Favourite List");
         recyclerView=findViewById(R.id.recycler_favourite);
 
     }

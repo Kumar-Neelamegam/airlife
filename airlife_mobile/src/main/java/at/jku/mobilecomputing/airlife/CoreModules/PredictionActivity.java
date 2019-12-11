@@ -27,6 +27,7 @@ public class PredictionActivity extends AppCompatActivity {
         setUPTheme();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle("Air Life - Prediction");
     }
 
     public void setUPTheme()

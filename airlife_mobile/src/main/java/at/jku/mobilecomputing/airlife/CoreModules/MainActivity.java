@@ -2,6 +2,7 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -517,6 +519,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.imgvw_favourite:
                 Toast.makeText(this, "Marked as favourite location..", Toast.LENGTH_SHORT).show();
+                callFavouriteDialog();
                 break;
             case R.id.imgvw_favlist:
                 startActivity(new Intent(this,ListFavActivity.class));
@@ -527,5 +530,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 break;
         }
+    }
+
+    private void callFavouriteDialog() {
+
+        // Create custom dialog object
+        final Dialog dialog = new Dialog(CustomDialog.this);
+        // Include dialog.xml file
+        dialog.setContentView(R.layout.dialog);
+
+        dialog.show();
+
+        Button cancelButton = (Button) dialog.findViewById(R.id.btn_save);
+        Button saveButton = (Button) dialog.findViewById(R.id.declineButton);
+        // if decline button is clicked, close the custom dialog
+        declineButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Close dialog
+                dialog.dismiss();
+            }
+        });
+
     }
 }
