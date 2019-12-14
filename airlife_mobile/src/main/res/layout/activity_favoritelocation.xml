@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/aqi_color_scale"
-        layout="@layout/aqi_color_scale" />
+        layout="@layout/aqi_color_scale_withoutlegend" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_favourite"

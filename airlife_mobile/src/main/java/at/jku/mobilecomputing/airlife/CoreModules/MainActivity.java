@@ -2,7 +2,6 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,7 +14,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +29,6 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
@@ -43,24 +40,21 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-import net.redwarp.library.database.DatabaseHelper;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
-import at.jku.mobilecomputing.airlife.Database.AqiDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
-import at.jku.mobilecomputing.airlife.NetworkUtils.APIInterface;
-import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
@@ -81,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Views
     private TextView aqiTextView, temperatureTextView, locationTextView, pressureTextView, humidityTextView, windTextView, attributionTextView;
     private RecyclerView pollutantsRecyclerView;
-    private ViewGroup rateUsCard;
+
 
     //Data
     private AqiViewModel aqiViewModel;
@@ -101,6 +95,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AppCompatImageView makeFavourite;
     AppCompatImageView listFavourite;
     AppCompatImageView predictMachineLearning;
+    AppCompatImageView btnRefresh;
+
+    double currentLatitude;
+    double currentLongitude;
 
     String apiFullResponse;
 
@@ -119,38 +117,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void InserttoDB(Data data, String latitude, String longitude) {
-        try {
-            DatabaseHelper helper = new DatabaseHelper(this);
 
-            AqiDataSet aqiDataSet=new AqiDataSet();
-            aqiDataSet.setFullResponse(apiFullResponse);
-            aqiDataSet.setAirquality(data.getAqi());
-            aqiDataSet.setQualityscale(Common.getscalefromquality(data.getAqi(), this));
-            aqiDataSet.setCurrentLatitude(latitude);
-            aqiDataSet.setCurrentLongitude(longitude);
-            aqiDataSet.setCity(data.getCity().getName());
-            aqiDataSet.setAddress(data.getCity().getUrl());
-            aqiDataSet.setDatetime(String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
-            aqiDataSet.setTemperature(getString(R.string.temperature_unit_celsius,data.getWaqi().getTemperature().getV()));
-            aqiDataSet.setHumidity(getString(R.string.humidity_unit,data.getWaqi().getHumidity().getV()));
-            aqiDataSet.setPressure(getString(R.string.pressure_unit,data.getWaqi().getPressure().getV()));
-            aqiDataSet.setWind(getString(R.string.wind_unit,data.getWaqi().getWind().getV()));
-            helper.save(aqiDataSet);
-
-            List<AqiDataSet> allPojos = helper.getAll(AqiDataSet.class);
-            for (AqiDataSet allPojo : allPojos) {
-                Log.e("Inserted Data:", String.valueOf(allPojo.getAirquality()));
-            }
-            long count = helper.getCount(AqiDataSet.class);
-            Log.e("Total count:", String.valueOf(count));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setUPTheme()
-    {
+    public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
         if (sharedPrefUtils.getAppInstallTime() == 0)
             sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
@@ -164,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(20 * 1000);
+        //locationRequest.setInterval(50 * 1000);
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -175,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (location != null) {
                         latestLocation = location;
                         getAqiDataFromLatitudeLongitude(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+                        currentLatitude = location.getLatitude();
+                        currentLongitude = location.getLongitude();
                     }
                 }
             }
@@ -182,18 +152,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void checkGPSAndRequestLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 checkLocationPermission();
-            } else {
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    //Call for AQI data based on location is done in "locationCallback"
-                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-                } else {
-                    new GPSUtils(this).turnGPSOn();
-                }
-            }
+            } else {*/
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            //Call for AQI data based on location is done in "locationCallback"
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        } else {
+            new GPSUtils(this).turnGPSOn();
         }
+        //    }
+        //}
     }
 
     private void scheduleWidgetUpdater() {
@@ -218,11 +188,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         humidityTextView = findViewById(R.id.humidity_text_view);
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
-        circleBackground=findViewById(R.id.aqi_background);
+        circleBackground = findViewById(R.id.aqi_background);
 
-        makeFavourite=findViewById(R.id.imgvw_favourite);
-        listFavourite=findViewById(R.id.imgvw_favlist);
-        predictMachineLearning=findViewById(R.id.imgvw_machinelarning);
+        makeFavourite = findViewById(R.id.imgvw_favourite);
+        listFavourite = findViewById(R.id.imgvw_favlist);
+        predictMachineLearning = findViewById(R.id.imgvw_machinelarning);
+        btnRefresh=findViewById(R.id.btnRefresh);
 
         setupRecyclerView();
         setupClickListeners();
@@ -240,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.imgvw_favourite).setOnClickListener(this);
         findViewById(R.id.imgvw_favlist).setOnClickListener(this);
         findViewById(R.id.imgvw_machinelarning).setOnClickListener(this);
+        findViewById(R.id.btnRefresh).setOnClickListener(this);
 
     }
 
@@ -247,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pollutantsRecyclerView = findViewById(R.id.pollutants_recycler_view);
         pollutantsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pollutantsRecyclerView.setHasFixedSize(true);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(),DividerItemDecoration.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         pollutantsRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
@@ -303,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     MY_PERMISSIONS_REQUEST_LOCATION);
                         })
                         .setNegativeButton("Cancel", (dialogInterface, i) -> {
-                            getAqiData();
+                            //getAqiData();
                         })
                         .create()
                         .show();
@@ -333,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                 } else {
-                    getAqiData();
+                    //getAqiData();
                 }
             }
         }
@@ -353,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             aqiViewModel.getGPSApiResponse(geo).observe(MainActivity.this, apiResponse -> {
                 if (apiResponse != null) {
                     try {
-                        apiFullResponse=String.valueOf(apiResponse);
+                        apiFullResponse = String.valueOf(apiResponse);
                         Log.e("api", String.valueOf(apiResponse));
                         data = apiResponse.getData();
                         aqiTextView.setText(String.valueOf(data.getAqi()));
@@ -363,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         WAQI waqi = data.getWaqi();
                         if (waqi.getTemperature() != null)
                             sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                            temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
                         if (waqi.getPressure() != null)
                             pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
                         if (waqi.getHumidity() != null)
@@ -371,11 +343,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         if (waqi.getWind() != null)
                             windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
                         locationTextView.setText(data.getCity().getName());
-                        setupAttributions(data);
+                        //setupAttributions(data);
                         addPollutantsToList(data.getWaqi());
                         pollutantsAdapter.notifyDataSetChanged();
                         updateWidget();
-                        InserttoDB(data, latitude, longitude);
+                        Common.InserttoDB(MainActivity.this, data, latitude, longitude, apiFullResponse);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -386,37 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void setAQIScaleGroup() {
-        int aqi = data.getAqi();
-        ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) {
-            aqiScaleText =findViewById(R.id.scaleGood);
-            circleBackground.setImageResource(R.drawable.circle_good);
-        }
-        else if (aqi >= 51 && aqi <= 100){
-            aqiScaleText = findViewById(R.id.scaleModerate);
-            circleBackground.setImageResource(R.drawable.circle_moderate);
-        } else if (aqi >= 101 && aqi <= 150){
-            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
-        } else if (aqi >= 151 && aqi <= 200){
-            aqiScaleText = findViewById(R.id.scaleUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_unhealthy);
-        } else if (aqi >= 201 && aqi <= 300){
-            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
-        } else if (aqi >= 301){
-            aqiScaleText = findViewById(R.id.scaleHazardous);
-            circleBackground.setImageResource(R.drawable.circle_harzardous);
-        } else{
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setBackgroundResource(R.drawable.circle_good);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
-        }
-    }
-
+/*
     private void getAqiData() {
         try {
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
@@ -444,15 +386,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (waqi.getWind() != null)
                         windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
                     locationTextView.setText(data.getCity().getName());
-                   // setupAttributions(data);
+                    // setupAttributions(data);
                     addPollutantsToList(data.getWaqi());
                     pollutantsAdapter.notifyDataSetChanged();
                     updateWidget();
-                    InserttoDB(data, "0", "0");
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+*/
+
+
+    private void setAQIScaleGroup() {
+        int aqi = data.getAqi();
+        ImageView aqiScaleText;
+        if (aqi >= 0 && aqi <= 50) {
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setImageResource(R.drawable.circle_good);
+        } else if (aqi >= 51 && aqi <= 100) {
+            aqiScaleText = findViewById(R.id.scaleModerate);
+            circleBackground.setImageResource(R.drawable.circle_moderate);
+        } else if (aqi >= 101 && aqi <= 150) {
+            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
+            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
+        } else if (aqi >= 151 && aqi <= 200) {
+            aqiScaleText = findViewById(R.id.scaleUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_unhealthy);
+        } else if (aqi >= 201 && aqi <= 300) {
+            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
+        } else if (aqi >= 301) {
+            aqiScaleText = findViewById(R.id.scaleHazardous);
+            circleBackground.setImageResource(R.drawable.circle_harzardous);
+        } else {
+            aqiScaleText = findViewById(R.id.scaleGood);
+            circleBackground.setBackgroundResource(R.drawable.circle_good);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
         }
     }
 
@@ -477,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (resultCode == Activity.RESULT_OK) {
                 checkGPSAndRequestLocation();
             } else {
-                getAqiData();
+                //getAqiData();
             }
         }
     }
@@ -518,39 +491,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 recreate();
                 break;
             case R.id.imgvw_favourite:
-                Toast.makeText(this, "Marked as favourite location..", Toast.LENGTH_SHORT).show();
-                callFavouriteDialog();
+
+                Common.callFavouriteDialog(MainActivity.this, currentLatitude, currentLongitude, locationTextView.getText().toString());
+
                 break;
             case R.id.imgvw_favlist:
-                startActivity(new Intent(this,ListFavActivity.class));
+                int count = Common.getFavouriteListCount(MainActivity.this);
+                if (count > 0) {
+                    startActivity(new Intent(this, ListFavActivity.class));
+                } else {
+                    Toast.makeText(this, "No list found..", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.imgvw_machinelarning:
-                startActivity(new Intent(this,PredictionActivity.class));
+                startActivity(new Intent(this, PredictionActivity.class));
                 break;
+
+            case R.id.btnRefresh:
+                getData();
+                Toast.makeText(this, "Please wait.. refreshing..", Toast.LENGTH_SHORT).show();
+                break;
+
             default:
                 break;
         }
     }
 
-    private void callFavouriteDialog() {
 
-        // Create custom dialog object
-        final Dialog dialog = new Dialog(CustomDialog.this);
-        // Include dialog.xml file
-        dialog.setContentView(R.layout.dialog);
-
-        dialog.show();
-
-        Button cancelButton = (Button) dialog.findViewById(R.id.btn_save);
-        Button saveButton = (Button) dialog.findViewById(R.id.declineButton);
-        // if decline button is clicked, close the custom dialog
-        declineButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Close dialog
-                dialog.dismiss();
-            }
-        });
-
-    }
 }

@@ -16,25 +16,31 @@
         android:padding="5dp">
 
         <TextView
+            android:padding="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter the favourite location name"
+            android:text="Enter the favourite name for this location"
             android:textColor="@color/colorPrimary" />
 
         <EditText
             android:id="@+id/edt_favname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="3" />
+            android:maxLines="2"
+            android:inputType="textCapSentences|textPersonName"
+            android:layout_marginTop="5dp"
+            android:maxLength="120"/>
 
         <TextView
             android:id="@+id/txt_currentlocation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Current Location: Linz 4040, Austria"
             android:textColor="@color/green" />
 
         <LinearLayout
+            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
@@ -42,7 +48,7 @@
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/bnt_cancel"
+                android:id="@+id/btn_cancel"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/aqi_color_scale"
-        layout="@layout/aqi_color_scale" />
+        layout="@layout/aqi_color_scale_withoutlegend" />
     <include
         android:id="@+id/aqi_color_scale"
         layout="@layout/row_item_predict" />

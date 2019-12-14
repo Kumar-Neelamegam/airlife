@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -11,6 +11,7 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/lightcommonaccent</item>
         <item name="android:windowBackground">@color/lightcommonaccent</item>
+        <item name="android:actionBarStyle">@style/MyActionBarDefaultTheme</item>
     </style>
 
     <!--Light Theme-->
@@ -23,6 +24,7 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/lightcommonaccent</item>
         <item name="android:windowBackground">@color/lightcommonaccent</item>
+        <item name="android:actionBarStyle">@style/MyActionBarLightTheme</item>
     </style>
 
     <!--Dark Theme-->
@@ -35,8 +37,20 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/darkcommonaccent</item>
         <item name="android:windowBackground">@color/darkcommonaccent</item>
+        <item name="android:actionBarStyle">@style/MyActionBarDarkTheme</item>
     </style>
 
+    <style name="MyActionBarDefaultTheme"  parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="MyActionBarLightTheme"  parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/colorthemeLightPrimary</item>
+    </style>
+
+    <style name="MyActionBarDarkTheme" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/colorthemeDarkPrimary</item>
+    </style>
     <!-- Text styles -->
     <style name="SplashText">
         <item name="android:text">@string/app_name</item>
@@ -83,4 +97,5 @@
         <item name="android:windowEnterAnimation">@anim/slide_up_fade</item>
         <item name="android:windowExitAnimation">@anim/slide_down_fade</item>
     </style>
+
 </resources>

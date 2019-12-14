@@ -3,6 +3,7 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
@@ -14,89 +15,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.jku.mobilecomputing.airlife.Adapters.FavouriteListAdapter;
-import at.jku.mobilecomputing.airlife.Adapters.FavouriteListObject;
 import at.jku.mobilecomputing.airlife.Constants.Common;
+import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
+import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 
-public class ListFavActivity extends AppCompatActivity implements FavouriteListAdapter.ItemClickListener, View.OnClickListener{
+public class ListFavActivity extends AppCompatActivity implements FavouriteListAdapter.ItemClickListener, View.OnClickListener {
 
     private SharedPrefUtils sharedPrefUtils;
-    ArrayList<FavouriteListObject> favouriteListObjects = new ArrayList<>();
+    ArrayList<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
     FavouriteListAdapter favouriteListAdapter;
     RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favoritelocation);
 
-        Init();
-        LoadDummyData();
+        try {
+            Init();
+            generateDummyList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private void LoadDummyData() {
+    private void LoadData(List<FavouriteListDataSet> result) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        favouriteListAdapter = new FavouriteListAdapter(this, generateDummyList());
+        favouriteListAdapter = new FavouriteListAdapter(this, result, recyclerView);
         favouriteListAdapter.setClickListener(this);
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(favouriteListAdapter);
     }
 
-    private List<FavouriteListObject> generateDummyList() {
+    private void generateDummyList() {
+        AsynkTaskCustom asynkTaskCustom = new AsynkTaskCustom(ListFavActivity.this, "Please wait...Loading...");
+        asynkTaskCustom.execute(new onWriteCode<List<FavouriteListDataSet>>() {
+            @Override
+            public List<FavouriteListDataSet> onExecuteCode() {
+                List<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
+                favouriteListObjects = Common.getAllFavouriteDataSet(ListFavActivity.this);
+                return favouriteListObjects;
+            }
 
-        List<FavouriteListObject> favouriteListObjects=new ArrayList<>();
-        FavouriteListObject favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(1);
-        favouriteListObject.setLocation("University");
-        favouriteListObject.setLocationInfo("Linz, 4040");
-        favouriteListObject.setQualityScale(1);
-        favouriteListObject.setQualityValue("50");
-        favouriteListObjects.add(favouriteListObject);
-
-        favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(1);
-        favouriteListObject.setLocation("Hostel");
-        favouriteListObject.setLocationInfo("Linz, 4040");
-        favouriteListObject.setQualityScale(1);
-        favouriteListObject.setQualityValue("50");
-        favouriteListObjects.add(favouriteListObject);
-
-
-        favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(2);
-        favouriteListObject.setLocation("Home");
-        favouriteListObject.setLocationInfo("Linz, 4020");
-        favouriteListObject.setQualityScale(1);
-        favouriteListObject.setQualityValue("50");
-        favouriteListObjects.add(favouriteListObject);
-
-        favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(3);
-        favouriteListObject.setLocation("Church");
-        favouriteListObject.setLocationInfo("Linz, 4040");
-        favouriteListObject.setQualityScale(2);
-        favouriteListObject.setQualityValue("20");
-        favouriteListObjects.add(favouriteListObject);
-
-        favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(4);
-        favouriteListObject.setLocation("Playground");
-        favouriteListObject.setLocationInfo("Graz, 4080");
-        favouriteListObject.setQualityScale(2);
-        favouriteListObject.setQualityValue("50");
-        favouriteListObjects.add(favouriteListObject);
-
-        favouriteListObject=new FavouriteListObject();
-        favouriteListObject.setSno(5);
-        favouriteListObject.setLocation("Restaurant");
-        favouriteListObject.setLocationInfo("Wels, 4070");
-        favouriteListObject.setQualityScale(4);
-        favouriteListObject.setQualityValue("50");
-        favouriteListObjects.add(favouriteListObject);
-
-
-        return favouriteListObjects;
+            @Override
+            public List<FavouriteListDataSet> onSuccess(List<FavouriteListDataSet> result) {
+                //Toast.makeText(ListFavActivity.this, result.toString(), Toast.LENGTH_SHORT).show();
+                LoadData(result);
+                return null;
+            }
+        });
     }
 
     private void Init() {
@@ -104,16 +75,14 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle("Air Life - Favourite List");
-        recyclerView=findViewById(R.id.recycler_favourite);
+        recyclerView = findViewById(R.id.recycler_favourite);
 
     }
 
-    public void setUPTheme()
-    {
+    public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.getAppInstallTime() == 0)
-            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
-        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
+        if (sharedPrefUtils.isDarkMode())
+            setTheme(R.style.AppTheme_Dark);
         else setTheme(R.style.AppTheme_Light);
     }
 

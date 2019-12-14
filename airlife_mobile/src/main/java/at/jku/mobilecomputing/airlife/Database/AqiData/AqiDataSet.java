@@ -1,12 +1,19 @@
-package at.jku.mobilecomputing.airlife.Database;
+package at.jku.mobilecomputing.airlife.Database.AqiData;
 
 
-import net.redwarp.library.database.annotation.PrimaryKey;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
+import java.util.Date;
+
+import at.jku.mobilecomputing.airlife.Database.TimestampConverter;
+
+@Entity
 public class AqiDataSet {
-
-    @PrimaryKey
-    long id;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
 
     public String getCurrentLatitude() {
         return currentLatitude;
@@ -117,12 +124,24 @@ public class AqiDataSet {
     String wind;
     String fullResponse;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @ColumnInfo(name = "created_at")
+    @TypeConverters({TimestampConverter.class})
+    private Date createdAt;
 
 }

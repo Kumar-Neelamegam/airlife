@@ -2,13 +2,21 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import at.jku.mobilecomputing.airlife.Constants.Common;
+import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
+import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
+import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 
 public class PredictionActivity extends AppCompatActivity {
 
@@ -19,7 +27,27 @@ public class PredictionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_prediction);
 
         Init();
+        getAllDataSet();
 
+    }
+
+    private void getAllDataSet() {
+        AsynkTaskCustom asynkTaskCustom = new AsynkTaskCustom(PredictionActivity.this, "Please wait...Loading...");
+        asynkTaskCustom.execute(new onWriteCode<List<AqiDataSet>>() {
+            @Override
+            public List<AqiDataSet> onExecuteCode() {
+                List<AqiDataSet> favouriteListObjects = new ArrayList<>();
+                favouriteListObjects = Common.getAllAQIDataSet(PredictionActivity.this);
+                return favouriteListObjects;
+            }
+
+            @Override
+            public List<AqiDataSet> onSuccess(List<AqiDataSet> result) {
+                //Toast.makeText(PredictionActivity.this, result.toString(), Toast.LENGTH_SHORT).show();
+
+                return result;
+            }
+        });
     }
 
     private void Init()
@@ -33,8 +61,6 @@ public class PredictionActivity extends AppCompatActivity {
     public void setUPTheme()
     {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.getAppInstallTime() == 0)
-            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
         if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
         else setTheme(R.style.AppTheme_Light);
     }
