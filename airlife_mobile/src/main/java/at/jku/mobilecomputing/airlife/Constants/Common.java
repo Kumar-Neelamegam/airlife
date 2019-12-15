@@ -18,8 +18,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import at.jku.mobilecomputing.airlife.Database.AirLifeDatabase;
-import at.jku.mobilecomputing.airlife.Database.AirLifeDatabase_Impl;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDAO;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
 import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;

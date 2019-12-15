@@ -1,45 +1,21 @@
 package at.jku.mobilecomputing.airlife.Adapters;
 
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import at.jku.mobilecomputing.airlife.Constants.Common;
-import at.jku.mobilecomputing.airlife.Constants.Status;
-import at.jku.mobilecomputing.airlife.CoreModules.ListFavActivity;
-import at.jku.mobilecomputing.airlife.CoreModules.MainActivity;
-import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
-import at.jku.mobilecomputing.airlife.DomainObjects.Data;
-import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
-import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
-import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.R;
-import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
-import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 
 
 public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdapter.ViewHolder> {
@@ -73,107 +49,94 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        callService(mData.get(position).getLatitude(), mData.get(position).getLongitude(), holder, position);
-        holder.textview_Sno.setText(String.valueOf(sno + 1));
-        holder.textview_LocationName.setText(mData.get(position).getLocation());
-        holder.textview_LocationInfo.setText(mData.get(position).getLocationInfo());
-        holder.imageview_delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean status = Common.deleteFavouriteItem(mData.get(position).getId(), ctx);
-                Toast.makeText(ctx, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
-                recyclerView.getAdapter().notifyItemChanged(position);
-                sno = 0;
-            }
-        });
-        holder.imageview_moreinfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        callService(mData.get(position), holder, position);
 
-
-                if(!rotate_flag)// false
-                {
-                    holder.imageview_moreinfo.animate().rotationBy(180).setDuration(0).start();
-                    holder.moreLayout.setVisibility(View.VISIBLE);
-                    rotate_flag=true;
-                }else
-                {
-                    holder.imageview_moreinfo.animate().rotationBy(180).setDuration(0).start();
-                    holder.moreLayout.setVisibility(View.GONE);
-                    rotate_flag=false;
-                }
-
-            }
-        });
-        sno++;
     }
 
-    private AqiViewModel aqiViewModel;
-    Data data = new Data();
-    private void callService(double lat, double longt, ViewHolder holder, int position) {
+    private void callService(FavouriteListDataSet mDatum, ViewHolder holder, int position) {
 
-        aqiViewModel = ViewModelProviders.of((FragmentActivity) ctx).get(AqiViewModel.class);
-        String geo = "geo:" + lat + ";" + longt;
-        Log.e("Locations Info:", geo);
+                    holder.textview_Sno.setText(String.valueOf(sno + 1));
+                    holder.textview_LocationName.setText(mDatum.getLocation());
+                    holder.textview_LocationInfo.setText(mDatum.getLocationInfo());
+                    holder.imageview_delete.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            boolean status = Common.deleteFavouriteItem(mDatum.getId(), ctx);
+                            Toast.makeText(ctx, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
+                            recyclerView.getAdapter().notifyDataSetChanged();
+                            sno = 0;
+                        }
+                    });
+                    holder.imageview_moreinfo.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
 
-        aqiViewModel.getGPSApiResponse(geo).observe((LifecycleOwner) ctx, apiResponse -> {
-            if (apiResponse != null) {
 
-                Log.e("api", String.valueOf(apiResponse));
+                            if(!rotate_flag)// false
+                            {
+                                holder.imageview_moreinfo.animate().rotationBy(180).setDuration(0).start();
+                                holder.moreLayout.setVisibility(View.VISIBLE);
+                                rotate_flag=true;
+                            }else
+                            {
+                                holder.imageview_moreinfo.animate().rotationBy(180).setDuration(0).start();
+                                holder.moreLayout.setVisibility(View.GONE);
+                                rotate_flag=false;
+                            }
 
-                data = apiResponse.getData();
+                        }
+                    });
+                    sno++;
 
-                //quality scale
-                holder.textview_QualityValue.setText(String.valueOf(data.getAqi()));
-                setQualityScale(data.getAqi(), holder);
+                    //quality scale
+                    holder.textview_QualityValue.setText(String.valueOf(mDatum.getQualityScale()));
+                    setQualityScale(mDatum.getQualityScale(), holder);
 
-                //pressure, temp, humid, wind
-                WAQI waqi = data.getWaqi();
-                if (waqi.getTemperature() != null)
-                    holder.textview_temp.setText(ctx.getResources().getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                if (waqi.getPressure() != null)
-                    holder.textview_pressure.setText(ctx.getResources().getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                if (waqi.getHumidity() != null)
-                    holder.textview_humid.setText(ctx.getResources().getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                if (waqi.getWind() != null)
-                    holder.textview_wind.setText(ctx.getResources().getString(R.string.wind_unit, waqi.getWind().getV()));
+                    //pressure, temp, humid, wind
+                    if (mDatum.getTemperature() != null)
+                        holder.textview_temp.setText(ctx.getResources().getString(R.string.temperature_unit_celsius, mDatum.getTemperature()));
+                    if (mDatum.getPressure() != null)
+                        holder.textview_pressure.setText(ctx.getResources().getString(R.string.pressure_unit, mDatum.getPressure()));
+                    if (mDatum.getHumidity() != null)
+                        holder.textview_humid.setText(ctx.getResources().getString(R.string.humidity_unit, mDatum.getHumidity()));
+                    if (mDatum.getWind() != null)
+                        holder.textview_wind.setText(ctx.getResources().getString(R.string.wind_unit, mDatum.getWind()));
 
-                setMoreInfo(waqi, holder);
+                    setMoreInfo(mDatum, holder);
 
-            }
-        });
+
     }
 
-    private void setMoreInfo(WAQI waqi, ViewHolder holder) {
+    private void setMoreInfo(FavouriteListDataSet favouriteListDataSet, ViewHolder holder) {
 
         StringBuilder stringBuilder=new StringBuilder();
         stringBuilder.append("More Info:\n");
-        if (waqi.getCo() != null){
-            stringBuilder.append("Carbon Monoxide - AQI: "+waqi.getCo().getV().toString());
+        if (favouriteListDataSet.getCo() != null){
+            stringBuilder.append("Carbon Monoxide - AQI: "+favouriteListDataSet.getCo());
             stringBuilder.append(",\n");
         }
-        if (waqi.getNo2() != null){
-            stringBuilder.append("Nitrous Dioxide - AQI: "+waqi.getNo2().getV().toString());
-            stringBuilder.append(",\n");
-        }
-
-        if (waqi.getO3() != null){
-            stringBuilder.append("Ozone - AQI: "+ waqi.getO3().getV().toString());
+        if (favouriteListDataSet.getNo2() != null){
+            stringBuilder.append("Nitrous Dioxide - AQI: "+favouriteListDataSet.getNo2());
             stringBuilder.append(",\n");
         }
 
-        if (waqi.getPm2_5() != null){
-            stringBuilder.append("PM 2.5 - AQI: "+ waqi.getPm2_5().getV().toString());
+        if (favouriteListDataSet.getO3() != null){
+            stringBuilder.append("Ozone - AQI: "+ favouriteListDataSet.getO3());
             stringBuilder.append(",\n");
         }
 
-        if (waqi.getPm10() != null){
-            stringBuilder.append("PM 10 - AQI: "+waqi.getPm10().getV().toString());
+        if (favouriteListDataSet.getPm25() != null){
+            stringBuilder.append("PM 2.5 - AQI: "+ favouriteListDataSet.getPm25());
             stringBuilder.append(",\n");
         }
 
-        if (waqi.getSo2() != null){
-            stringBuilder.append("Sulfur Dioxide - AQI:"+ waqi.getSo2().getV().toString());
+        if (favouriteListDataSet.getPm10() != null){
+            stringBuilder.append("PM 10 - AQI: "+favouriteListDataSet.getPm10());
+            stringBuilder.append(",\n");
+        }
+
+        if (favouriteListDataSet.getSo2() != null){
+            stringBuilder.append("Sulfur Dioxide - AQI:"+ favouriteListDataSet.getSo2());
         }
 
         if (stringBuilder!=null) {
@@ -200,10 +163,6 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
         }
 
 
-    }
-
-    private int calculateDistance() {
-        return 0;
     }
 
     // total number of rows

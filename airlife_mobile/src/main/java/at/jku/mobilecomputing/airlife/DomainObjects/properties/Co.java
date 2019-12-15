@@ -1,10 +1,12 @@
 
 package at.jku.mobilecomputing.airlife.DomainObjects.properties;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Co {
+public class Co  {
 
     @SerializedName("v")
     @Expose

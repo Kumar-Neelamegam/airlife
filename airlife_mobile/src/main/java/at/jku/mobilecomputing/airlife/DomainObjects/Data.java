@@ -9,8 +9,9 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 import at.jku.mobilecomputing.airlife.Constants.Time;
+import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 
-public class Data {
+public class Data   {
 
     @SerializedName("aqi")
     @Expose

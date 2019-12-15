@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
 
                 } else {
-                    //getAqiData();
+                    getAqiData();
                 }
             }
         }
@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
                         setAQIScaleGroup();
                         WAQI waqi = data.getWaqi();
-                        if (waqi.getTemperature() != null)
+                        if (waqi.getTemperature().getV() != null)
                             sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
                         temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
                         if (waqi.getPressure() != null)
@@ -358,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-/*
+
     private void getAqiData() {
         try {
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
-*/
+
 
 
     private void setAQIScaleGroup() {
@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (resultCode == Activity.RESULT_OK) {
                 checkGPSAndRequestLocation();
             } else {
-                //getAqiData();
+                getAqiData();
             }
         }
     }
