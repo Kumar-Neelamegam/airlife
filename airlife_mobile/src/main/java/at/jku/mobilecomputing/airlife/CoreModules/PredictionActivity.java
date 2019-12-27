@@ -1,5 +1,6 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -58,11 +59,17 @@ public class PredictionActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Air Life - Prediction");
     }
 
-    public void setUPTheme()
-    {
+    public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
-        else setTheme(R.style.AppTheme_Light);
+        if (sharedPrefUtils.isDarkMode()){
+            setTheme(R.style.AppTheme_Dark);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeDarkPrimary)));
+        }
+        else {
+            setTheme(R.style.AppTheme_Light);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeLightPrimary)));
+        }
+
     }
 
 

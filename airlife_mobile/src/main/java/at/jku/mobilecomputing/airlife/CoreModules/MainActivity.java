@@ -333,15 +333,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
                         setAQIScaleGroup();
                         WAQI waqi = data.getWaqi();
-                        if (waqi.getTemperature().getV() != null)
-                            sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                        if (waqi.getPressure() != null)
-                            pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                        if (waqi.getHumidity() != null)
-                            humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                        if (waqi.getWind() != null)
-                            windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                        try {
+                            if (waqi.getTemperature().getV() != null)
+                                sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                            temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
+                            if (waqi.getPressure() != null)
+                                pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
+                            if (waqi.getHumidity() != null)
+                                humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
+                            if (waqi.getWind() != null)
+                                windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         locationTextView.setText(data.getCity().getName());
                         //setupAttributions(data);
                         addPollutantsToList(data.getWaqi());

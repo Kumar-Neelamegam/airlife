@@ -11,7 +11,7 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/lightcommonaccent</item>
         <item name="android:windowBackground">@color/lightcommonaccent</item>
-        <item name="android:actionBarStyle">@style/MyActionBarDefaultTheme</item>
+        <item name="actionBarStyle">@style/MyActionBarDefaultTheme</item>
     </style>
 
     <!--Light Theme-->
@@ -24,7 +24,7 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/lightcommonaccent</item>
         <item name="android:windowBackground">@color/lightcommonaccent</item>
-        <item name="android:actionBarStyle">@style/MyActionBarLightTheme</item>
+        <item name="actionBarStyle">@style/MyActionBarLightTheme</item>
     </style>
 
     <!--Dark Theme-->
@@ -37,19 +37,19 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:navigationBarColor">@color/darkcommonaccent</item>
         <item name="android:windowBackground">@color/darkcommonaccent</item>
-        <item name="android:actionBarStyle">@style/MyActionBarDarkTheme</item>
+        <item name="actionBarStyle">@style/MyActionBarDarkTheme</item>
     </style>
 
     <style name="MyActionBarDefaultTheme"  parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/colorPrimary</item>
+        <item name="background">@color/colorPrimary</item>
     </style>
 
     <style name="MyActionBarLightTheme"  parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/colorthemeLightPrimary</item>
+        <item name="background">@color/colorthemeLightPrimary</item>
     </style>
 
     <style name="MyActionBarDarkTheme" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/colorthemeDarkPrimary</item>
+        <item name="background">@color/colorthemeDarkPrimary</item>
     </style>
     <!-- Text styles -->
     <style name="SplashText">

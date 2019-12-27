@@ -1,6 +1,8 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.app.ProgressDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +30,7 @@ import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
+import at.jku.mobilecomputing.airlife.DomainObjects.properties.Co;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIInterface;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
@@ -93,9 +96,15 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.isDarkMode())
+        if (sharedPrefUtils.isDarkMode()){
             setTheme(R.style.AppTheme_Dark);
-        else setTheme(R.style.AppTheme_Light);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeDarkPrimary)));
+        }
+        else {
+            setTheme(R.style.AppTheme_Light);
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeLightPrimary)));
+        }
+
     }
 
 
