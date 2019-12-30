@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,8 +17,11 @@ import androidx.core.app.NavUtils;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,7 @@ import at.jku.mobilecomputing.airlife.BuildConfig;
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
+import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDAO;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
@@ -37,18 +42,19 @@ import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
+import at.jku.mobilecomputing.airlife.Utilities.RecyclerItemTouchHelper;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ListFavActivity extends AppCompatActivity implements FavouriteListAdapter.ItemClickListener, View.OnClickListener {
+public class ListFavActivity extends AppCompatActivity implements FavouriteListAdapter.ItemClickListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, View.OnClickListener {
 
     private SharedPrefUtils sharedPrefUtils;
-    ArrayList<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
     FavouriteListAdapter favouriteListAdapter;
     RecyclerView recyclerView;
+    LinearLayout parentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,16 +71,27 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     }
 
     private void LoadData(List<FavouriteListDataSet> result) {
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        favouriteListAdapter = new FavouriteListAdapter(this, result, recyclerView);
+        favouriteListAdapter = new FavouriteListAdapter(this, result);
         favouriteListAdapter.setClickListener(this);
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         recyclerView.setAdapter(favouriteListAdapter);
+
+        // adding item touch helper
+        // only ItemTouchHelper.LEFT added to detect Right to Left swipe
+        // if you want both Right -> Left and Left -> Right
+        // add pass ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT as param
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+
     }
 
+    List<FavouriteListDataSet> favouriteListObjects;
     private void generateDummyList() {
 
-        List<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
+        favouriteListObjects = new ArrayList<>();
         favouriteListObjects = Common.getAllFavouriteDataSet(ListFavActivity.this);
         showDialog("Loading data from nearest station...");
 
@@ -91,6 +108,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle("Air Life - Favourite List");
         recyclerView = findViewById(R.id.recycler_favourite);
+        parentLayout = findViewById(R.id.parent_layout);
 
     }
 
@@ -133,9 +151,9 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     @Override
     public void onItemClick(View view, int position) {
+        //Toast.makeText(this, "clicked on:"+ position, Toast.LENGTH_SHORT).show();
 
     }
-
 
     private RetrofitHelper mRetrofitHelper;
     private APIInterface mApiInterface;
@@ -210,4 +228,25 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     }
 
 
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+
+        if (viewHolder instanceof FavouriteListAdapter.ViewHolder) {
+            // get the removed item name to display it in snack bar
+            String name = favouriteListObjects.get(viewHolder.getAdapterPosition()).getLocation();
+
+             boolean status = Common.deleteFavouriteItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId(), this);
+             //Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
+
+
+            // remove the item from recycler view
+            favouriteListAdapter.removeItem(viewHolder.getAdapterPosition());
+
+            // showing snack bar with Undo option
+            Snackbar snackbar = Snackbar.make(parentLayout, name + " removed from favourite list!", Snackbar.LENGTH_LONG);
+            snackbar.show();
+
+        }
+
+    }
 }

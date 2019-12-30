@@ -1,11 +1,13 @@
 package at.jku.mobilecomputing.airlife.Adapters;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,16 +26,15 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
     private List<FavouriteListDataSet> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+
     Context ctx;
     int sno = 0;
-    RecyclerView recyclerView;
 
     // data is passed into the constructor
-    public FavouriteListAdapter(Context context, List<FavouriteListDataSet> data, RecyclerView recyclerView) {
+    public FavouriteListAdapter(Context context, List<FavouriteListDataSet> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         ctx = context;
-        this.recyclerView = recyclerView;
     }
 
 
@@ -58,15 +59,8 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
                     holder.textview_Sno.setText(String.valueOf(sno + 1));
                     holder.textview_LocationName.setText(mDatum.getLocation());
                     holder.textview_LocationInfo.setText(mDatum.getLocationInfo());
-                    holder.imageview_delete.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            boolean status = Common.deleteFavouriteItem(mDatum.getId(), ctx);
-                            Toast.makeText(ctx, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
-                            recyclerView.getAdapter().notifyDataSetChanged();
-                            sno = 0;
-                        }
-                    });
+
+
                     holder.imageview_moreinfo.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -184,11 +178,12 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
         TextView textview_humid;
 
         ImageView imageview_QualityScale;
-        ImageView imageview_delete;
 
         LinearLayout moreLayout;
         ImageView imageview_moreinfo;
         TextView txtvw_moreinfo;
+
+        public RelativeLayout viewBackground, viewForeground;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -207,7 +202,10 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
             txtvw_moreinfo=itemView.findViewById(R.id.txt_moreinfo);
 
             imageview_QualityScale = itemView.findViewById(R.id.imgvw_airqualityscale);
-            imageview_delete = itemView.findViewById(R.id.imgvw_delete);
+
+            viewBackground = itemView.findViewById(R.id.view_background);
+            viewForeground = itemView.findViewById(R.id.view_foreground);
+
             itemView.setOnClickListener(this);
         }
 
@@ -215,6 +213,7 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
         public void onClick(View view) {
             if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
         }
+
     }
 
     // convenience method for getting data at click position
@@ -230,6 +229,22 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+
+    public void removeItem(int position) {
+        mData.remove(position);
+        // notify the item removed by position
+        // to perform recycler view delete animations
+        // NOTE: don't call notifyDataSetChanged()
+        sno=0;
+        notifyItemRemoved(position);
+    }
+
+    public void restoreItem(FavouriteListDataSet item, int position) {
+        mData.add(position, item);
+        // notify item added by position
+        notifyItemInserted(position);
     }
 
 }

@@ -48,5 +48,6 @@
     <string name="pollutants_aqi">Pollutants AQI</string>
     <string name="footer">Institute for Telecooperation,\nJKU, Linz</string>
     <string name="quotes">Prevention is better than cure</string>
+    <string name="delete">Delete</string>
 
 </resources>
