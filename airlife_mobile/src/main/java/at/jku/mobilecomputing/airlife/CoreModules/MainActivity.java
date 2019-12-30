@@ -2,6 +2,7 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,6 +25,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -520,6 +523,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
+
+
+    public void sendNotification(View view) {
+        String toSend = "sample testing";
+        if(toSend.isEmpty())
+            toSend = "You sent an empty notification";
+        Notification notification = new NotificationCompat.Builder(getApplication())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("AndroidAuthority")
+                .setContentText(toSend)
+                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
+                .build();
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
+        int notificationId = 1;
+        notificationManager.notify(notificationId, notification);
+    }
+
 
 
 }
