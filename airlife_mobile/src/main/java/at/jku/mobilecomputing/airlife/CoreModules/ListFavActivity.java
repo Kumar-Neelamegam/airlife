@@ -1,9 +1,6 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
-import android.app.ProgressDialog;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -11,11 +8,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,22 +23,14 @@ import java.util.List;
 import at.jku.mobilecomputing.airlife.Adapters.FavouriteListAdapter;
 import at.jku.mobilecomputing.airlife.BuildConfig;
 import at.jku.mobilecomputing.airlife.Constants.Common;
-import at.jku.mobilecomputing.airlife.Constants.Status;
-import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
-import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDAO;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
-import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
-import at.jku.mobilecomputing.airlife.DomainObjects.properties.Co;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIInterface;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
-import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
-import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
 import at.jku.mobilecomputing.airlife.Utilities.RecyclerItemTouchHelper;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
-import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -238,13 +224,15 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
              boolean status = Common.deleteFavouriteItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId(), this);
              //Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
 
-
             // remove the item from recycler view
-            favouriteListAdapter.removeItem(viewHolder.getAdapterPosition());
+            favouriteListAdapter.removeItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());
+            favouriteListObjects.remove(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());//remove in local
 
-            // showing snack bar with Undo option
-            Snackbar snackbar = Snackbar.make(parentLayout, name + " removed from favourite list!", Snackbar.LENGTH_LONG);
-            snackbar.show();
+            if (status){
+                // showing snack bar with Undo option
+                Snackbar snackbar = Snackbar.make(parentLayout, name + " removed from favourite list!", Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
 
         }
 
