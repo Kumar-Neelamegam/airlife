@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
@@ -66,6 +67,7 @@ public class PredictionActivity extends AppCompatActivity {
         stringBuilder.append("% AirLife");stringBuilder.append(newLine);
         stringBuilder.append("@RELATION AirLife");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE Id NUMERIC");stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE timestamp NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE airquality NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE currentLatitude REAL");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE currentLongitude REAL");stringBuilder.append(newLine);
@@ -73,32 +75,30 @@ public class PredictionActivity extends AppCompatActivity {
         stringBuilder.append("@ATTRIBUTE humidity NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE pressure NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE wind NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE class {good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous}");stringBuilder.append(newLine);
+
         stringBuilder.append("@DATA");stringBuilder.append(newLine);
         for (AqiDataSet aqiDataSet : aqiDataSets) {
             stringBuilder.append(aqiDataSet.getId()); stringBuilder.append(lineSeparator);
+            String timeStamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
+            stringBuilder.append(timeStamp); stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getAirquality()); stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getCurrentLatitude()); stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getCurrentLongitude()); stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0]);
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(aqiDataSet.getHumidity().replace("%",""));
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(aqiDataSet.getPressure().split(" ")[0]);
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(lineQuotes);
             stringBuilder.append(aqiDataSet.getWind().split(" ")[0]);
-            stringBuilder.append(lineQuotes);
+            stringBuilder.append(lineSeparator);
+
+            stringBuilder.append(getclassName(aqiDataSet.getAirquality()));
             stringBuilder.append(newLine);
         }
 
@@ -109,13 +109,31 @@ public class PredictionActivity extends AppCompatActivity {
 
         try {
             Prediction prediction=new Prediction();
-            prediction.loadTrainingSet(arffFile);
-            prediction.machineLearning(this);
+            prediction.loadTrainingSet(this, arffFile);
+            //prediction.machineLearning(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    private String getclassName(int aqi) {
+        String returnValue="good";
+        if (aqi >= 0 && aqi <= 50) {
+           returnValue="good";
+        } else if (aqi >= 51 && aqi <= 100) {
+            returnValue="moderate";
+        } else if (aqi >= 101 && aqi <= 150) {
+            returnValue="unhealthysensitive";
+        } else if (aqi >= 151 && aqi <= 200) {
+            returnValue="unhealthy";
+        } else if (aqi >= 201 && aqi <= 300) {
+            returnValue="veryunhealthy";
+        } else if (aqi >= 301) {
+            returnValue="hazardous";
+        }
+        return returnValue;
     }
 
 

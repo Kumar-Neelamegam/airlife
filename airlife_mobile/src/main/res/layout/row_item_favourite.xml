@@ -9,7 +9,7 @@
         android:id="@+id/view_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="30dp"
+        android:padding="5dp"
         android:background="#fa315b">
 
         <ImageView
@@ -41,13 +41,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:padding="@dimen/padd_10">
+        >
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:layout_marginRight="5dp"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp"
             app:cardCornerRadius="5dp"
             app:cardElevation="5dp"
             app:cardPreventCornerOverlap="true"

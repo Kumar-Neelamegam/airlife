@@ -20,7 +20,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'com.google.android.support:wearable:2.5.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'

@@ -28,7 +28,7 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
     private ItemClickListener mClickListener;
 
     Context ctx;
-    int sno = 0;
+    static int sno = 0;
 
     // data is passed into the constructor
     public FavouriteListAdapter(Context context, List<FavouriteListDataSet> data) {
@@ -56,7 +56,7 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
 
     private void callService(FavouriteListDataSet mDatum, ViewHolder holder, int position) {
 
-                    holder.textview_Sno.setText(String.valueOf(sno + 1));
+                    holder.textview_Sno.setText(String.valueOf(position+1));
                     holder.textview_LocationName.setText(mDatum.getLocation());
                     holder.textview_LocationInfo.setText(mDatum.getLocationInfo());
 
@@ -80,7 +80,6 @@ public class FavouriteListAdapter extends RecyclerView.Adapter<FavouriteListAdap
 
                         }
                     });
-                    sno++;
 
                     //quality scale
                     holder.textview_QualityValue.setText(String.valueOf(mDatum.getQualityScale()));
