@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,11 +42,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
@@ -100,8 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AppCompatImageView predictMachineLearning;
     AppCompatImageView btnRefresh;
 
-    double currentLatitude;
-    double currentLongitude;
+    double currentLatitude = 0;
+    double currentLongitude = 0;
 
     String apiFullResponse;
 
@@ -148,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         getAqiDataFromLatitudeLongitude(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
                         currentLatitude = location.getLatitude();
                         currentLongitude = location.getLongitude();
+                        Log.e("onLocationResult: ", currentLatitude + "=" + currentLongitude);
                     }
                 }
             }
@@ -511,7 +508,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.imgvw_machinelarning:
-                startActivity(new Intent(this, PredictionActivity.class));
+                Intent mIntent = new Intent(this, PredictionActivity.class);
+                Bundle extras = new Bundle();
+                extras.putDouble("latitude", currentLatitude);
+                extras.putDouble("longitude", currentLongitude);
+                mIntent.putExtras(extras);
+                startActivity(mIntent);
                 break;
 
             case R.id.btnRefresh:

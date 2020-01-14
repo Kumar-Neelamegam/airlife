@@ -4,17 +4,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +25,8 @@ import at.jku.mobilecomputing.machinelearning.Prediction;
 public class PredictionActivity extends AppCompatActivity {
 
     private SharedPrefUtils sharedPrefUtils;
+    double lat;
+    double lng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +35,8 @@ public class PredictionActivity extends AppCompatActivity {
 
         Init();
         getAllDataSet();
-
+        lat = getIntent().getExtras().getDouble("latitude");
+        lng = getIntent().getExtras().getDouble("longitude");
 
     }
 
@@ -109,7 +108,7 @@ public class PredictionActivity extends AppCompatActivity {
 
         try {
             Prediction prediction=new Prediction();
-            prediction.loadTrainingSet(this, arffFile);
+            prediction.loadTrainingSet(this, arffFile, lat, lng);
             //prediction.machineLearning(this);
         } catch (Exception e) {
             e.printStackTrace();
