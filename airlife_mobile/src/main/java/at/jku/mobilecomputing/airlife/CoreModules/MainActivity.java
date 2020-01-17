@@ -108,9 +108,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             setUPTheme();
             setContentView(R.layout.activity_main);
             init();
-            getData();
-            checkGPSAndRequestLocation();
-            scheduleWidgetUpdater();
+            if (Common.getNetworkStatus(this)) {
+                getData();
+                checkGPSAndRequestLocation();
+                scheduleWidgetUpdater();
+            } else {
+                Toast.makeText(MainActivity.this, getResources().getString(R.string.msg_nonetworkconnection), Toast.LENGTH_SHORT).show();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

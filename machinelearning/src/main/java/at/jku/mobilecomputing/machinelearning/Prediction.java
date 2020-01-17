@@ -35,9 +35,11 @@ public class Prediction {
         ArffLoader loader;
         Instances dataSet;
 
+        currentLatitude = lat;
+        currentLongitude = lng;
+
         try {
             //1. Loading training dataset
-
             loader = new ArffLoader();
             loader.setSource(arffFile);
             dataSet = loader.getDataSet();
@@ -58,74 +60,6 @@ public class Prediction {
 
             //5. classification using the generated model
             modelClassifier(classifier_result);
-
-           /* // Load classifer model
-            AssetManager assetManager = ctx.getAssets();
-            Classifier wekaClassifier = (Classifier) weka.core.SerializationHelper.read(assetManager.open("airlife.model"));
-
-            // Predict
-            final Attribute id = new Attribute("id");
-            final Attribute timestamp  = new Attribute("timestamp");
-            final Attribute airquality  = new Attribute("airquality");
-            final Attribute currentLatitude  = new Attribute("currentLatitude");
-            final Attribute currentLongitude  = new Attribute("currentLongitude");
-            final Attribute temperature  = new Attribute("temperature");
-            final Attribute humidity  = new Attribute("humidity");
-            final Attribute pressure  = new Attribute("pressure");
-            final Attribute wind  = new Attribute("wind");
-
-            final List<String> classes = new ArrayList<String>() {
-                {
-                    add("good");
-                    add("moderate");
-                    add("unhealthysensitive");
-                    add("unhealthy");
-                    add("veryunhealthy");
-                    add("hazardous");
-                }
-            };
-
-            // Instances(...) requires ArrayList<> instead of List<>...
-            ArrayList<Attribute> attributeList = new ArrayList<Attribute>(2) {
-                {
-                    add(timestamp);
-                    add(airquality);
-                    add(currentLatitude);
-                    add(currentLongitude);
-                    Attribute attributeClass = new Attribute("@@class@@", classes);
-                    add(attributeClass);
-                }
-            };
-
-            // unpredicted data sets (reference to sample structure for new instances)
-            Instances dataUnpredicted = new Instances("TestInstances",attributeList, 1);
-            // last feature is target variable
-            dataUnpredicted.setClassIndex(dataUnpredicted.numAttributes() - 1);
-
-
-            // create new instance: this one should fall into the setosa domain
-            DenseInstance newInstance = new DenseInstance(dataUnpredicted.numAttributes()) {
-                {
-                    setValue(timestamp, 1579032166);
-                    setValue(airquality, 310);
-                    setValue(currentLatitude, 62.60);
-                    setValue(currentLongitude, 94.56);
-                }
-            };
-            // reference to dataset
-            newInstance.setDataset(dataUnpredicted);
-
-
-            // predict new sample
-            try {
-                double result = wekaClassifier.classifyInstance(newInstance);
-                String className = classes.get(new Double(result).intValue());
-                String msg = "timestamp: " + 1 + ", airquality: " + className + ", actual: " + 1;
-                Log.d(WEKA_TEST, msg);
-                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
 
         } catch (IOException e) {
             e.printStackTrace();

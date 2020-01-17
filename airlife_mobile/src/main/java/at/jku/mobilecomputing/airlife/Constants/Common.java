@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -14,13 +16,11 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDAO;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
-import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDAO;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
@@ -48,7 +48,25 @@ public class Common {
         return scale;
     }
 
+    public static boolean getNetworkStatus(Context ctx) {
 
+        boolean status = false;
+        ConnectivityManager conMgr = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED
+                || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+
+            // notify user you are online
+            status = true;
+
+        } else if
+        (conMgr.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.DISCONNECTED
+                        || conMgr.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.DISCONNECTED) {
+            // notify user you are not online
+            status = false;
+        }
+        return status;
+    }
 
     public static void callFavouriteDialog(Context ctx, double currentLatitidue, double currentLongitude, String currentLocation) {
 

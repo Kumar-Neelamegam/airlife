@@ -50,4 +50,9 @@
     <string name="quotes">Prevention is better than cure</string>
     <string name="delete">Delete</string>
 
+
+    <string name="msg_nonetworkconnection">Network not connected!!</string>
+    <string name="no_network_connection">No network available!!</string>
+    <string name="no_data_found">No data found..</string>
+
 </resources>
