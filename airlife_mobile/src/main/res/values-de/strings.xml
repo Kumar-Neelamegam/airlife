@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">Luftleben</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="runtime_permissions_txt">Bitte aktivieren Sie ALLE Berechtigungen aus den App-Einstellungen.</string>
+
+
+    <string name="alert_title_gps_off">GPS ist ausgeschaltet</string>
+    <string name="alert_content_gps_off">Bitte schalten Sie GPS ein, um genauere Daten zu erhalten. </string>
+    <string name="alert_title_location_access">Standortzugriff zulassen</string>
+    <string name="alert_content_location_access">Bitte erlauben Sie dem Standortzugriff, Luftqualität- und Wetterinformationen abzurufen. </string>
+
+    <!--Health Implications-->
+    <string name="good_health_implications">Die Luftqualität wird als zufriedenstellend angesehen, und die Luftverschmutzung birgt kein oder nur ein geringes Risiko.</string>
+    <string name="moderate_health_implications">Die Luftqualität ist akzeptabel. Bei einigen Schadstoffen kann es jedoch zu einer mäßigen Gesundheitsgefährdung für eine sehr kleine Anzahl von Personen kommen, die ungewöhnlich empfindlich auf Luftverschmutzung reagieren.</string>
+    <string name="unhealthy_for_sensitive_health_implications">Mitglieder sensibler Gruppen können gesundheitliche Auswirkungen haben. Die breite Öffentlichkeit dürfte davon nicht betroffen sein.</string>
+    <string name="unhealthy_health_implications">Jeder kann beginnen, gesundheitliche Auswirkungen zu spüren. Mitglieder sensibler Gruppen können schwerwiegendere gesundheitliche Auswirkungen haben.</string>
+    <string name="very_unhealthy_health_implications">Gesundheitswarnungen bei Notfällen. Es ist wahrscheinlicher, dass die gesamte Bevölkerung betroffen ist.</string>
+    <string name="hazardous_health_implications">Gesundheitswarnung: Jeder kann schwerwiegendere gesundheitliche Auswirkungen haben. </string>
+
+    <string name="atppwidget_text">AQI</string>
+
+    <!--AQI Range-->
+    <string name="good_range">0 – 50</string>
+    <string name="moderate_range">51 – 100</string>
+    <string name="unhealthy_for_sensitive_range">101 – 150</string>
+    <string name="unhealthy_range">151 – 200</string>
+    <string name="very_unhealthy_range">201 – 300</string>
+    <string name="hazardous_range">300+</string>
+
+    <!--AQI Scale-->
+    <string name="good">Gut</string>
+    <string name="moderate">Moderat</string>
+    <string name="unhealthy_for_sensitive">Ungesund für sensible Gruppe</string>
+    <string name="unhealthy">Ungesund</string>
+    <string name="very_unhealthy">Sehr ungesund</string>
+    <string name="hazardous">Gefährlich</string>
+
+    <string name="temperature_unit_celsius">%1$.1f &#176;C</string>
+    <string name="humidity_unit">%1$.0f%%</string>
+    <string name="pressure_unit">%1$.1f mb</string>
+    <string name="wind_unit">%1$.1f m/s</string>
+
+    <string name="place_holder">---</string>
+    <string name="pressure">Druck</string>
+    <string name="humidity">Luftfeuchtigkeit</string>
+    <string name="wind">Wind</string>
+    <string name="attribution">Attributionen</string>
+    <string name="pollutants_aqi">Schadstoff-AQI</string>
+    <string name="footer">Institut für Telekooperation, \nJKU, Linz</string>
+    <string name="quotes">Vorbeugen ist besser als heilen</string>
+    <string name="delete">Löschen</string>
+
+
+    <string name="msg_nonetworkconnection">Netzwerk nicht verbunden !!</string>
+    <string name="no_network_connection">Kein Netzwerk verfügbar!!</string>
+    <string name="no_data_found">Keine Daten gefunden..</string>
+
+</resources>

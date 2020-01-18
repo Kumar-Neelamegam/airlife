@@ -12,7 +12,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
@@ -68,8 +67,10 @@ public class PredictionActivity extends AppCompatActivity {
         stringBuilder.append("@ATTRIBUTE Id NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE timestamp NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE airquality NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE currentLatitude REAL");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE currentLongitude REAL");stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE currentLatitude NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE currentLongitude NUMERIC");
+        stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE temperature NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE humidity NUMERIC");stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE pressure NUMERIC");stringBuilder.append(newLine);
@@ -79,22 +80,22 @@ public class PredictionActivity extends AppCompatActivity {
         stringBuilder.append("@DATA");stringBuilder.append(newLine);
         for (AqiDataSet aqiDataSet : aqiDataSets) {
             stringBuilder.append(aqiDataSet.getId()); stringBuilder.append(lineSeparator);
-            String timeStamp = String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
-            stringBuilder.append(timeStamp); stringBuilder.append(lineSeparator);
+            stringBuilder.append(aqiDataSet.getDatetime());
+            stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getAirquality()); stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getCurrentLatitude()); stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getCurrentLongitude()); stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0]);
+            stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0].replace(",", "."));
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getHumidity().replace("%",""));
+            stringBuilder.append(aqiDataSet.getHumidity().replace("%", "").replace(",", "."));
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getPressure().split(" ")[0]);
+            stringBuilder.append(aqiDataSet.getPressure().split(" ")[0].replace(",", "."));
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getWind().split(" ")[0]);
+            stringBuilder.append(aqiDataSet.getWind().split(" ")[0].replace(",", "."));
             stringBuilder.append(lineSeparator);
 
             stringBuilder.append(getclassName(aqiDataSet.getAirquality()));

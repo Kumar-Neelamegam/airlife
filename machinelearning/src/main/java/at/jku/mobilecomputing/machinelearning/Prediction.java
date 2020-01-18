@@ -6,7 +6,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -145,7 +145,8 @@ public class Prediction {
 
             //build current dataset
             if (dataRaw != null) dataRaw.clear();
-            double[] instanceValue1 = new double[]{new Date().getTime(), currentLatitude, currentLongitude};
+            double timestamp1 = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+            double[] instanceValue1 = new double[]{timestamp1, currentLatitude, currentLongitude};
             dataRaw.add(new DenseInstance(1.0, instanceValue1));
 
             //classify

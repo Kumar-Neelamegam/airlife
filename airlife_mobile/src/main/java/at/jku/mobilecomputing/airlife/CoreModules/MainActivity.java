@@ -2,7 +2,6 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Notification;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,8 +23,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -48,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
 import at.jku.mobilecomputing.airlife.Constants.Common;
+import at.jku.mobilecomputing.airlife.Constants.LocaleHelper;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
 import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
@@ -95,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AppCompatImageView listFavourite;
     AppCompatImageView predictMachineLearning;
     AppCompatImageView btnRefresh;
+    AppCompatImageView btnLanguage;
 
     double currentLatitude = 0;
     double currentLongitude = 0;
@@ -195,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         attributionTextView = findViewById(R.id.attribution_text_view);
         circleBackground = findViewById(R.id.aqi_background);
 
+        btnLanguage = findViewById(R.id.btnLanguage);
+
         makeFavourite = findViewById(R.id.imgvw_favourite);
         listFavourite = findViewById(R.id.imgvw_favlist);
         predictMachineLearning = findViewById(R.id.imgvw_machinelarning);
@@ -217,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.imgvw_favlist).setOnClickListener(this);
         findViewById(R.id.imgvw_machinelarning).setOnClickListener(this);
         findViewById(R.id.btnRefresh).setOnClickListener(this);
+        btnLanguage.setOnClickListener(this);
 
     }
 
@@ -526,25 +528,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "Please wait.. refreshing..", Toast.LENGTH_SHORT).show();
                 break;
 
+            case R.id.btnLanguage:
+                if (LocaleHelper.getLanguage(this).equals("en")) {
+                    Common.setLocale_new(this, "de");
+                    recreate();
+                    Toast.makeText(this, "Language updated to german..", Toast.LENGTH_SHORT).show();
+                }//else
+            {
+                Common.setLocale_new(this, "en");
+                Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
+            }
+
+            break;
+
             default:
                 break;
         }
-    }
-
-
-    public void sendNotification(View view) {
-        String toSend = "sample testing";
-        if(toSend.isEmpty())
-            toSend = "You sent an empty notification";
-        Notification notification = new NotificationCompat.Builder(getApplication())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("AndroidAuthority")
-                .setContentText(toSend)
-                .extend(new NotificationCompat.WearableExtender().setHintShowBackgroundOnly(true))
-                .build();
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplication());
-        int notificationId = 1;
-        notificationManager.notify(notificationId, notification);
     }
 
 

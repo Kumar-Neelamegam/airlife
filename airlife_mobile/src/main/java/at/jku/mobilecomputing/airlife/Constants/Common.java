@@ -1,12 +1,16 @@
 package at.jku.mobilecomputing.airlife.Constants;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +20,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
@@ -237,6 +242,39 @@ public class Common {
             }
         }.execute();
     }
+
+
+    public static void setLanguage(Context ctx, String language) {
+        try {
+            //Change Application level locale
+            LocaleHelper.setLocale(ctx, language);
+
+            //It is required to recreate the activity to reflect the change in UI.
+            ((Activity) ctx).recreate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void setLocale_new(Context ctx, String lang) {
+
+        try {
+
+            Locale myLocale = new Locale(lang);
+            Resources res = ctx.getResources();
+            DisplayMetrics dm = res.getDisplayMetrics();
+            Configuration conf = res.getConfiguration();
+            conf.locale = myLocale;
+            res.updateConfiguration(conf, dm);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
 
 
 }
