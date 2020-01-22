@@ -145,8 +145,8 @@ public class Prediction {
 
             //build current dataset
             if (dataRaw != null) dataRaw.clear();
-            double timestamp1 = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-            double[] instanceValue1 = new double[]{timestamp1, currentLatitude, currentLongitude};
+            double timestamp1 = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());//Current timestamp
+            double[] instanceValue1 = new double[]{timestamp1, currentLatitude, currentLongitude};//Current latitude & Current Longitude
             dataRaw.add(new DenseInstance(1.0, instanceValue1));
 
             //classify

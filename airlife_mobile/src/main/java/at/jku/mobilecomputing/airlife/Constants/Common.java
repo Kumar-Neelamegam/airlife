@@ -2,7 +2,10 @@ package at.jku.mobilecomputing.airlife.Constants;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -10,11 +13,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,8 +33,10 @@ import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDAO;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDAO;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
+import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 
 public class Common {
     public static String getscalefromquality(Integer aqi, Context ctx) {
@@ -274,6 +281,64 @@ public class Common {
 
     }
 
+
+    /**
+     * Main activity - additional tasks
+     */
+
+    public static void setAQIScaleGroup(Data data, ImageView circleBackground, Context ctx) {
+        int aqi = data.getAqi();
+        ImageView aqiScaleText;
+        if (aqi >= 0 && aqi <= 50) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleGood);
+            circleBackground.setImageResource(R.drawable.circle_good);
+        } else if (aqi >= 51 && aqi <= 100) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleModerate);
+            circleBackground.setImageResource(R.drawable.circle_moderate);
+        } else if (aqi >= 101 && aqi <= 150) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleUnhealthySensitive);
+            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
+        } else if (aqi >= 151 && aqi <= 200) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_unhealthy);
+        } else if (aqi >= 201 && aqi <= 300) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleVeryUnhealthy);
+            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
+        } else if (aqi >= 301) {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleHazardous);
+            circleBackground.setImageResource(R.drawable.circle_harzardous);
+        } else {
+            aqiScaleText = ((Activity) ctx).findViewById(R.id.scaleGood);
+            circleBackground.setBackgroundResource(R.drawable.circle_good);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            aqiScaleText.setForeground(ctx.getDrawable(R.drawable.selected_aqi_foreground));
+        }
+    }
+
+    public static void setupAttributions(Data data, TextView attributionTextView) {
+        int index = 1;
+        StringBuilder attributionText = new StringBuilder();
+        for (Attribution attribution : data.getAttributions()) {
+            attributionText.append(index++)
+                    .append(". ")
+                    .append(attribution.getName())
+                    .append("\n")
+                    .append(attribution.getUrl())
+                    .append("\n\n");
+        }
+        attributionTextView.setText(attributionText);
+    }
+
+    public static void updateWidget(Context ctx) {
+        Intent intent = new Intent(ctx, ALWidget.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
+        // since it seems the onUpdate() is only fired on that:
+        int[] ids = AppWidgetManager.getInstance(ctx.getApplicationContext()).getAppWidgetIds(new ComponentName(ctx.getApplicationContext(), ALWidget.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        ctx.sendBroadcast(intent);
+    }
 
 
 

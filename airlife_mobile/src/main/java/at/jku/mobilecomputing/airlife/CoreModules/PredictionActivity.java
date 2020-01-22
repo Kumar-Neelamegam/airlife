@@ -41,52 +41,69 @@ public class PredictionActivity extends AppCompatActivity {
 
     private void callMachineLearning(List<AqiDataSet> aqiDataSets) {
 
-
         // show samples
         StringBuilder sb = new StringBuilder("Samples:\n");
         for (AqiDataSet aqiDataSet : aqiDataSets) {
             sb.append(aqiDataSet.getAirquality() + "\n");
         }
 
-
         createModelARFF(aqiDataSets);
-
-
 
     }
 
+    /**
+     * Create a training dataset from the local room database - step 1
+     * ARFF (Attribute-Relation File Format)
+     *
+     * @param aqiDataSets
+     */
     private void createModelARFF(List<AqiDataSet> aqiDataSets) {
 
-        String newLine="\n";
-        String lineSeparator=",";
-        String lineQuotes="\"";
-        StringBuilder stringBuilder=new StringBuilder();
+        String newLine = "\n";
+        String lineSeparator = ",";
+        String lineQuotes = "\"";
+        StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("% AirLife");stringBuilder.append(newLine);
-        stringBuilder.append("@RELATION AirLife");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE Id NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE timestamp NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE airquality NUMERIC");stringBuilder.append(newLine);
+        stringBuilder.append("% AirLife");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@RELATION AirLife");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE Id NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE timestamp NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE airquality NUMERIC");
+        stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE currentLatitude NUMERIC");
         stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE currentLongitude NUMERIC");
         stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE temperature NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE humidity NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE pressure NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE wind NUMERIC");stringBuilder.append(newLine);
-        stringBuilder.append("@ATTRIBUTE class {good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous}");stringBuilder.append(newLine);
+        /*stringBuilder.append("@ATTRIBUTE temperature NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE humidity NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE pressure NUMERIC");
+        stringBuilder.append(newLine);
+        stringBuilder.append("@ATTRIBUTE wind NUMERIC");
+        stringBuilder.append(newLine);*/
+        stringBuilder.append("@ATTRIBUTE class {good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous}");
+        stringBuilder.append(newLine);
 
-        stringBuilder.append("@DATA");stringBuilder.append(newLine);
+        stringBuilder.append("@DATA");
+        stringBuilder.append(newLine);
         for (AqiDataSet aqiDataSet : aqiDataSets) {
-            stringBuilder.append(aqiDataSet.getId()); stringBuilder.append(lineSeparator);
+            stringBuilder.append(aqiDataSet.getId());
+            stringBuilder.append(lineSeparator);
             stringBuilder.append(aqiDataSet.getDatetime());
             stringBuilder.append(lineSeparator);
-            stringBuilder.append(aqiDataSet.getAirquality()); stringBuilder.append(lineSeparator);
-            stringBuilder.append(aqiDataSet.getCurrentLatitude()); stringBuilder.append(lineSeparator);
-            stringBuilder.append(aqiDataSet.getCurrentLongitude()); stringBuilder.append(lineSeparator);
+            stringBuilder.append(aqiDataSet.getAirquality());
+            stringBuilder.append(lineSeparator);
+            stringBuilder.append(aqiDataSet.getCurrentLatitude());
+            stringBuilder.append(lineSeparator);
+            stringBuilder.append(aqiDataSet.getCurrentLongitude());
+            stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0].replace(",", "."));
+            /*stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0].replace(",", "."));
             stringBuilder.append(lineSeparator);
 
             stringBuilder.append(aqiDataSet.getHumidity().replace("%", "").replace(",", "."));
@@ -96,19 +113,19 @@ public class PredictionActivity extends AppCompatActivity {
             stringBuilder.append(lineSeparator);
 
             stringBuilder.append(aqiDataSet.getWind().split(" ")[0].replace(",", "."));
-            stringBuilder.append(lineSeparator);
+            stringBuilder.append(lineSeparator);*/
 
             stringBuilder.append(getclassName(aqiDataSet.getAirquality()));
             stringBuilder.append(newLine);
         }
 
-        Log.e( "createModelARFF: ", stringBuilder.toString());
+        Log.e("createModelARFF: ", stringBuilder.toString());
 
-        InputStream arffFile=new ByteArrayInputStream(stringBuilder.toString().getBytes());
+        InputStream arffFile = new ByteArrayInputStream(stringBuilder.toString().getBytes());
 
 
         try {
-            Prediction prediction=new Prediction();
+            Prediction prediction = new Prediction();
             prediction.loadTrainingSet(this, arffFile, lat, lng);
             //prediction.machineLearning(this);
         } catch (Exception e) {
@@ -119,19 +136,19 @@ public class PredictionActivity extends AppCompatActivity {
     }
 
     private String getclassName(int aqi) {
-        String returnValue="good";
+        String returnValue = "good";
         if (aqi >= 0 && aqi <= 50) {
-           returnValue="good";
+            returnValue = "good";
         } else if (aqi >= 51 && aqi <= 100) {
-            returnValue="moderate";
+            returnValue = "moderate";
         } else if (aqi >= 101 && aqi <= 150) {
-            returnValue="unhealthysensitive";
+            returnValue = "unhealthysensitive";
         } else if (aqi >= 151 && aqi <= 200) {
-            returnValue="unhealthy";
+            returnValue = "unhealthy";
         } else if (aqi >= 201 && aqi <= 300) {
-            returnValue="veryunhealthy";
+            returnValue = "veryunhealthy";
         } else if (aqi >= 301) {
-            returnValue="hazardous";
+            returnValue = "hazardous";
         }
         return returnValue;
     }

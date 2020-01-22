@@ -62,7 +62,9 @@ public class InfoDialog extends Dialog {
                 aqiRangeTextView.setTextColor(color);
                 pollutionLevelTextView.setBackgroundColor(color);
                 pollutionLevelTextView.setText(R.string.moderate);
+                pollutionLevelTextView.setTextColor(context.getResources().getColor(R.color.black));
                 healthImplicationTextView.setText(R.string.moderate_health_implications);
+                healthImplicationTextView.setTextColor(context.getResources().getColor(R.color.black));
                 imgvwLogo.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_smile_moderate));
                 cardView.setCardBackgroundColor(color);
                 break;

@@ -5,8 +5,10 @@
     android:layout_height="match_parent">
 
     <include
+        layout="@layout/aqi_color_scale_withoutlegend"
         android:id="@+id/aqi_color_scale"
-        layout="@layout/aqi_color_scale_withoutlegend" />
+        android:layout_width="match_parent"
+        android:layout_height="80dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_favourite"

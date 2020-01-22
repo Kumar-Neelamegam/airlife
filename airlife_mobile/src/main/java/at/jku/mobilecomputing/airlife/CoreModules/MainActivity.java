@@ -2,18 +2,14 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +44,6 @@ import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.LocaleHelper;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
-import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
@@ -57,7 +52,6 @@ import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.GPSUtils;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
-import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 import at.jku.mobilecomputing.airlife.Widget.DataUpdateWidgetWorker;
 
 import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.GOOD;
@@ -184,6 +178,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         WorkManager.getInstance().enqueue(periodicWorkRequest);
     }
 
+    /**
+     * Initiate widgets
+     */
     private void init() {
         aqiTextView = findViewById(R.id.aqi_text_view);
         temperatureTextView = findViewById(R.id.temperature_text_view);
@@ -193,18 +190,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
         circleBackground = findViewById(R.id.aqi_background);
-
         btnLanguage = findViewById(R.id.btnLanguage);
-
         makeFavourite = findViewById(R.id.imgvw_favourite);
         listFavourite = findViewById(R.id.imgvw_favlist);
         predictMachineLearning = findViewById(R.id.imgvw_machinelarning);
-        btnRefresh=findViewById(R.id.btnRefresh);
+        btnRefresh = findViewById(R.id.btnRefresh);
 
         setupRecyclerView();
         setupClickListeners();
     }
 
+    /**
+     * Setup widgets control listeners
+     */
     private void setupClickListeners() {
         findViewById(R.id.scaleGood).setOnClickListener(this);
         findViewById(R.id.scaleModerate).setOnClickListener(this);
@@ -318,6 +316,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Get air quality data by passing latitude and longitude
+     *
+     * @param latitude
+     * @param longitude
+     */
     private void getAqiDataFromLatitudeLongitude(String latitude, String longitude) {
         try {
             String geo = "geo:" + latitude + ";" + longitude;
@@ -338,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         aqiTextView.setText(String.valueOf(data.getAqi()));
                         //TODO: Find better implementation
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                        setAQIScaleGroup();
+                        Common.setAQIScaleGroup(data, circleBackground, this);
                         WAQI waqi = data.getWaqi();
                         try {
                             if (waqi.getTemperature().getV() != null)
@@ -357,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //setupAttributions(data);
                         addPollutantsToList(data.getWaqi());
                         pollutantsAdapter.notifyDataSetChanged();
-                        updateWidget();
+                        Common.updateWidget(this);
                         Common.InserttoDB(MainActivity.this, data, latitude, longitude, apiFullResponse);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -370,6 +374,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    /**
+     * Get air quality data by using network ip
+     */
     private void getAqiData() {
         try {
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
@@ -386,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     aqiTextView.setText(String.valueOf(data.getAqi()));
                     //TODO: Find better implementation
                     sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                    setAQIScaleGroup();
+                    Common.setAQIScaleGroup(data, circleBackground, this);
                     WAQI waqi = data.getWaqi();
                     if (waqi.getTemperature() != null)
                         temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
@@ -400,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     // setupAttributions(data);
                     addPollutantsToList(data.getWaqi());
                     pollutantsAdapter.notifyDataSetChanged();
-                    updateWidget();
+                    Common.updateWidget(this);
                 }
             });
         } catch (Exception e) {
@@ -408,51 +415,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
-
-    private void setAQIScaleGroup() {
-        int aqi = data.getAqi();
-        ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) {
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setImageResource(R.drawable.circle_good);
-        } else if (aqi >= 51 && aqi <= 100) {
-            aqiScaleText = findViewById(R.id.scaleModerate);
-            circleBackground.setImageResource(R.drawable.circle_moderate);
-        } else if (aqi >= 101 && aqi <= 150) {
-            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
-        } else if (aqi >= 151 && aqi <= 200) {
-            aqiScaleText = findViewById(R.id.scaleUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_unhealthy);
-        } else if (aqi >= 201 && aqi <= 300) {
-            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
-        } else if (aqi >= 301) {
-            aqiScaleText = findViewById(R.id.scaleHazardous);
-            circleBackground.setImageResource(R.drawable.circle_harzardous);
-        } else {
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setBackgroundResource(R.drawable.circle_good);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
-        }
-    }
-
-    private void setupAttributions(Data data) {
-        int index = 1;
-        StringBuilder attributionText = new StringBuilder();
-        for (Attribution attribution : data.getAttributions()) {
-            attributionText.append(index++)
-                    .append(". ")
-                    .append(attribution.getName())
-                    .append("\n")
-                    .append(attribution.getUrl())
-                    .append("\n\n");
-        }
-        attributionTextView.setText(attributionText);
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -464,16 +426,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 getAqiData();
             }
         }
-    }
-
-    private void updateWidget() {
-        Intent intent = new Intent(this, ALWidget.class);
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
-        // since it seems the onUpdate() is only fired on that:
-        int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), ALWidget.class));
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        sendBroadcast(intent);
     }
 
     @Override
@@ -545,7 +497,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-
 
 
 }

@@ -42,6 +42,12 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     RecyclerView recyclerView;
     LinearLayout parentLayout;
 
+    private final String apiKey = BuildConfig.ApiKey;
+    List<FavouriteListDataSet> result = new ArrayList<>();
+    List<FavouriteListDataSet> favouriteListObjects;
+    private RetrofitHelper mRetrofitHelper;
+    private APIInterface mApiInterface;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +55,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
         try {
             Init();
-            generateDummyList();
+            generateList();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,19 +80,17 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
-    List<FavouriteListDataSet> favouriteListObjects;
-    private void generateDummyList() {
+    private void generateList() {
 
         favouriteListObjects = new ArrayList<>();
         favouriteListObjects = Common.getAllFavouriteDataSet(ListFavActivity.this);
         showDialog("Loading data from nearest station...");
 
         for (FavouriteListDataSet favouriteListObject : favouriteListObjects) {
-            getAqiDataFromLatitudeLongitude(favouriteListObject.getLatitude(), favouriteListObject.getLongitude(),favouriteListObject.getLocation(), favouriteListObjects.size());
+            getAqiDataFromLatitudeLongitude(favouriteListObject.getLatitude(), favouriteListObject.getLongitude(), favouriteListObject.getLocation(), favouriteListObjects.size());
         }
 
     }
-
 
     private void Init() {
         setUPTheme();
@@ -100,17 +104,15 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
-        if (sharedPrefUtils.isDarkMode()){
+        if (sharedPrefUtils.isDarkMode()) {
             setTheme(R.style.AppTheme_Dark);
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeDarkPrimary)));
-        }
-        else {
+        } else {
             setTheme(R.style.AppTheme_Light);
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorthemeLightPrimary)));
         }
 
     }
-
 
     @Override
     public void onBackPressed() {
@@ -129,7 +131,6 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     public void onClick(View v) {
 
@@ -141,10 +142,6 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
-    private RetrofitHelper mRetrofitHelper;
-    private APIInterface mApiInterface;
-    private final String apiKey = BuildConfig.ApiKey;
-    List<FavouriteListDataSet> result=new ArrayList<>();
     private void getAqiDataFromLatitudeLongitude(double latitude, double longitude, String location, int totalSize) {
         try {
 
@@ -192,12 +189,11 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
                 @Override
                 public void onFailure(Call<APIResponse> call, Throwable t) {
-                        Toast.makeText(ListFavActivity.this, t.toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(ListFavActivity.this, t.toString(), Toast.LENGTH_LONG).show();
                     dismissDialog();
 
                 }
             });
-
 
 
         } catch (Exception e) {
@@ -221,14 +217,14 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
             // get the removed item name to display it in snack bar
             String name = favouriteListObjects.get(viewHolder.getAdapterPosition()).getLocation();
 
-             boolean status = Common.deleteFavouriteItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId(), this);
-             //Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
+            boolean status = Common.deleteFavouriteItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId(), this);
+            //Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
 
             // remove the item from recycler view
             favouriteListAdapter.removeItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());
             favouriteListObjects.remove(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());//remove in local
 
-            if (status){
+            if (status) {
                 // showing snack bar with Undo option
                 Snackbar snackbar = Snackbar.make(parentLayout, name + " removed from favourite list!", Snackbar.LENGTH_LONG);
                 snackbar.show();
