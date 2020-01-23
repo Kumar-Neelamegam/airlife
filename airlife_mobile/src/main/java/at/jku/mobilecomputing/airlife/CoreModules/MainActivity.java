@@ -37,6 +37,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.yariksoffice.lingver.Lingver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,6 @@ import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
 import at.jku.mobilecomputing.airlife.Constants.Common;
-import at.jku.mobilecomputing.airlife.Constants.LocaleHelper;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
@@ -365,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setWeatherInfo(String lat, String lng) {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
-        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
             /*
             You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
             */
@@ -378,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //WAQI waqi = data.getWaqi();
                 try {
                     if (currentWeatherInfo.getCurrentTemperature() != null)
-                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
                     if (currentWeatherInfo.getPressure() != null)
                         pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
                     if (currentWeatherInfo.getHumidity() != null)
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setWeatherInfo() {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
-        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
             /*
             You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
             */
@@ -476,8 +476,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //WAQI waqi = data.getWaqi();
                 try {
                     if (currentWeatherInfo.getCurrentTemperature() != null)
-                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
                     if (currentWeatherInfo.getPressure() != null)
                         pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
                     if (currentWeatherInfo.getHumidity() != null)
@@ -583,7 +583,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btnLanguage:
-                if (LocaleHelper.getLanguage(this).equals("en")) {
+                if (Lingver.getInstance().getLanguage().equals(Common.deafultLanguage)) {//==en
+                    Lingver.getInstance().setLocale(this, Common.germanLanguage);
+                    Toast.makeText(this, "Language updated to german..", Toast.LENGTH_SHORT).show();
+                    sharedPrefUtils.saveLatestLanguage(Common.germanLanguage);
+                } else {
+                    Lingver.getInstance().setLocale(this, Common.deafultLanguage);
+                    sharedPrefUtils.saveLatestLanguage(Common.deafultLanguage);
+                    Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
+                }
+                recreate();
+             /*   if (LocaleHelper.getLanguage(this).equals("en")) {
                     Common.setLocale_new(this, "de");
                     recreate();
                     Toast.makeText(this, "Language updated to german..", Toast.LENGTH_SHORT).show();
@@ -591,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             {
                 Common.setLocale_new(this, "en");
                 Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
-            }
+            }*/
 
             break;
 
@@ -600,5 +610,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        System.gc();
+    }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finishAffinity();
+    }
 }

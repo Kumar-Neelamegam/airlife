@@ -46,7 +46,6 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     private final String apiKey = BuildConfig.ApiKey;
     List<FavouriteListDataSet> result = new ArrayList<>();
-    List<FavouriteListDataSet> favouriteListObjects;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,12 +81,12 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     private void generateList() {
 
-        favouriteListObjects = new ArrayList<>();
+        List<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
         favouriteListObjects = Common.getAllFavouriteDataSet(ListFavActivity.this);
         showDialog(getResources().getString(R.string.fav_loading_msg));
 
         for (FavouriteListDataSet favouriteListObject : favouriteListObjects) {
-            getAqiDataFromLatitudeLongitude(favouriteListObject.getLatitude(), favouriteListObject.getLongitude(), favouriteListObject.getLocation(), favouriteListObjects.size());
+            getAqiDataFromLatitudeLongitude(favouriteListObject.getId(), favouriteListObject.getLatitude(), favouriteListObject.getLongitude(), favouriteListObject.getLocation(), favouriteListObjects.size());
         }
 
     }
@@ -142,7 +141,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
-    private void getAqiDataFromLatitudeLongitude(double latitude, double longitude, String location, int totalSize) {
+    private void getAqiDataFromLatitudeLongitude(int id, double latitude, double longitude, String location, int totalSize) {
         try {
 
             String geo = "geo:" + latitude + ";" + longitude;
@@ -155,7 +154,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
                     Data data = new Data();
                     data = response.body().getData();
                     FavouriteListDataSet favouriteListDataSet = new FavouriteListDataSet();
-                    favouriteListDataSet.setId(data.getIdx());
+                    favouriteListDataSet.setId(id);
                     favouriteListDataSet.setLocation(location);
                     favouriteListDataSet.setLocationInfo(data.getCity().getName());
                     favouriteListDataSet.setQualityScale(data.getAqi());
@@ -192,7 +191,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     private void setWeatherInfo(FavouriteListDataSet favouriteListDataSet, int totalSize, double latitude, double longitude) {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
-        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
             /*
             You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
             */
@@ -202,7 +201,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
                 if (currentWeatherInfo.getHumidity() != null)
                     favouriteListDataSet.setHumidity(Double.parseDouble(currentWeatherInfo.getHumidity()));
                 if (currentWeatherInfo.getCurrentTemperature() != null)
-                    favouriteListDataSet.setTemperature(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F);
+                    favouriteListDataSet.setTemperature(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius);
                 if (currentWeatherInfo.getPressure() != null)
                     favouriteListDataSet.setPressure(Double.parseDouble(currentWeatherInfo.getPressure()));
                 if (currentWeatherInfo.getWindSpeed() != null)
@@ -219,7 +218,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
             @Override
             public void onFailure(String error) {
                 // Your code here
-                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+                Log.e("WeatherInfo-onFailure: ", error);
             }
         });
 
@@ -238,20 +237,20 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
 
         if (viewHolder instanceof FavouriteListAdapter.ViewHolder) {
-            // get the removed item name to display it in snack bar
-            String name = favouriteListObjects.get(viewHolder.getAdapterPosition()).getLocation();
 
-            boolean status = Common.deleteFavouriteItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId(), this);
-            //Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
-
-            // remove the item from recycler view
-            favouriteListAdapter.removeItem(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());
-            favouriteListObjects.remove(favouriteListObjects.get(viewHolder.getAdapterPosition()).getId());//remove in local
+            boolean status = Common.deleteFavouriteItem(result.get(viewHolder.getAdapterPosition()).getId(), this);
+            Toast.makeText(this, status == true ? "Deleted successfully.." : "", Toast.LENGTH_SHORT).show();
 
             if (status) {
                 // showing snack bar with Undo option
-                Snackbar snackbar = Snackbar.make(parentLayout, name + " removed from favourite list!", Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(parentLayout, result.get(viewHolder.getAdapterPosition()).getLocation() + " removed from favourite list!", Snackbar.LENGTH_LONG);
                 snackbar.show();
+
+                // remove the item from recycler view
+                Log.e("getAdapterPosition: ", String.valueOf(viewHolder.getAdapterPosition()));
+                Log.e("onSwiped: ", String.valueOf(result.get(viewHolder.getAdapterPosition()).getId()));
+                favouriteListAdapter.removeItem(viewHolder.getAdapterPosition());//remove in adapter
+
             }
 
         }

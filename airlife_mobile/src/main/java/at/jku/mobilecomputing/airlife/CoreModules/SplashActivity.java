@@ -11,7 +11,9 @@ import android.widget.ImageView;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.Wave;
+import com.yariksoffice.lingver.Lingver;
 
+import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 
@@ -19,6 +21,7 @@ public class SplashActivity extends CoreActivity {
 
     private static final long SPLASH_DURATION = 3000;
     SpinKitView spinKitView;
+    SharedPrefUtils sharedPrefUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +44,13 @@ public class SplashActivity extends CoreActivity {
     public void onPermissionsGranted(int requestCode) {
 
         try {
+            Lingver.init(getApplication(), Common.deafultLanguage);
+
+            sharedPrefUtils = SharedPrefUtils.getInstance(this);
+            if (!sharedPrefUtils.getLatestLanguage().equals("")) {
+                Lingver.getInstance().setLocale(this, sharedPrefUtils.getLatestLanguage());   //set the saved language
+                sharedPrefUtils.saveLatestLanguage(sharedPrefUtils.getLatestLanguage());
+            }
 
             getInit();
 
@@ -77,7 +87,7 @@ public class SplashActivity extends CoreActivity {
 
     private void navigate() {
         startActivity(new Intent(SplashActivity.this, MainActivity.class));
-        finish();
+        finishAffinity();
     }
 
     private void doBounceAnimation(View targetView) {
@@ -113,4 +123,8 @@ public class SplashActivity extends CoreActivity {
         super.onDestroy();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 }

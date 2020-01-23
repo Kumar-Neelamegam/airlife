@@ -8,6 +8,10 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
+import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
+import com.ftoslab.openweatherretrieverz.WeatherCallback;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -125,8 +129,28 @@ public class PredictionActivity extends AppCompatActivity {
 
 
         try {
-            Prediction prediction = new Prediction();
-            prediction.loadTrainingSet(this, arffFile, lat, lng);
+            // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+            OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
+
+            retriever.updateCurrentWeatherInfo(lat, lng, new WeatherCallback() {
+                @Override
+                public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                    String current_temp = String.valueOf(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius);
+                    String current_pressure = currentWeatherInfo.getPressure();
+                    String current_humd = currentWeatherInfo.getHumidity();
+                    String current_wind = currentWeatherInfo.getWindSpeed();
+                    Prediction prediction = new Prediction();
+                    prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, current_temp, current_pressure, current_humd, current_wind);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    // Your code here
+                    Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+                }
+            });
+
+
             //prediction.machineLearning(this);
         } catch (Exception e) {
             e.printStackTrace();

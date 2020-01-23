@@ -41,6 +41,12 @@ import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 
 public class Common {
+
+    public static String openWeatherKey = "df21ec7ffa6b60adcee1e9f722b1e46d";
+    public static double KelvinToCelcius = 273.15F;
+    public static String deafultLanguage = "en";
+    public static String germanLanguage = "de";
+
     public static String getscalefromquality(Integer aqi, Context ctx) {
         String scale="N/A";
         if (aqi >= 0 && aqi <= 50) {
@@ -153,7 +159,7 @@ public class Common {
             String humidity = currentWeatherInfo.getHumidity() != null ? currentWeatherInfo.getHumidity() : "0";
             String pressure = currentWeatherInfo.getPressure() != null ? currentWeatherInfo.getPressure() : "0";
             String wind = currentWeatherInfo.getWindSpeed() != null ? currentWeatherInfo.getWindSpeed() : "0";
-            aqiDataSet.setTemperature(String.valueOf(Double.parseDouble(temperature) - 273.15F));
+            aqiDataSet.setTemperature(String.valueOf(Double.parseDouble(temperature) - Common.KelvinToCelcius));
             aqiDataSet.setHumidity(humidity);
             aqiDataSet.setPressure(pressure);
             aqiDataSet.setWind(wind);

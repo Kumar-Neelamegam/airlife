@@ -26,7 +26,7 @@ public class Prediction {
     double currentLatitude, currentLongitude;
     String ModelPath = "";
 
-    public void loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng) {
+    public void loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng, String current_temp, String current_pressure, String current_humd, String current_wind) {
 
 
         Filter filter = new Normalize();
@@ -59,7 +59,7 @@ public class Prediction {
             //ModelPath = root.getPath() + "/generated.model";
 
             //5. classification using the generated model
-            modelClassifier(classifier_result);
+            modelClassifier(classifier_result, current_temp, current_pressure, current_humd, current_wind);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -118,7 +118,7 @@ public class Prediction {
     }
 
     //5. classification using the generated model
-    public void modelClassifier(Classifier classifier_result) {
+    public void modelClassifier(Classifier classifier_result, String current_temp, String current_pressure, String current_humd, String current_wind) {
         try {
             ArrayList attributes = new ArrayList();
             ArrayList classVal = new ArrayList();
@@ -127,6 +127,10 @@ public class Prediction {
             Attribute timestamp = new Attribute("timestamp");
             Attribute latitude = new Attribute("currentLatitude");
             Attribute longitude = new Attribute("currentLongitude");
+            Attribute temperature = new Attribute("temperature");
+            Attribute pressure = new Attribute("pressure");
+            Attribute wind = new Attribute("wind");
+            Attribute humidity = new Attribute("humidity");
 
             classVal.add("good");
             classVal.add("moderate");
@@ -134,10 +138,13 @@ public class Prediction {
             classVal.add("unhealthy");
             classVal.add("veryunhealthy");
             classVal.add("hazardous");
-
             attributes.add(timestamp);
             attributes.add(latitude);
             attributes.add(longitude);
+            attributes.add(temperature);
+            attributes.add(pressure);
+            attributes.add(wind);
+            attributes.add(humidity);
 
             attributes.add(new Attribute("class", classVal));
             dataRaw = new Instances("TestInstances", attributes, 0);
@@ -164,6 +171,7 @@ public class Prediction {
             e.printStackTrace();
         }
     }
+
     //**************************************************************************************************
 
 
