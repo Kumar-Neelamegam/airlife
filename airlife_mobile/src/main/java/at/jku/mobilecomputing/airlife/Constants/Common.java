@@ -153,7 +153,7 @@ public class Common {
             String humidity = currentWeatherInfo.getHumidity() != null ? currentWeatherInfo.getHumidity() : "0";
             String pressure = currentWeatherInfo.getPressure() != null ? currentWeatherInfo.getPressure() : "0";
             String wind = currentWeatherInfo.getWindSpeed() != null ? currentWeatherInfo.getWindSpeed() : "0";
-            aqiDataSet.setTemperature(temperature);
+            aqiDataSet.setTemperature(String.valueOf(Double.parseDouble(temperature) - 273.15F));
             aqiDataSet.setHumidity(humidity);
             aqiDataSet.setPressure(pressure);
             aqiDataSet.setWind(wind);

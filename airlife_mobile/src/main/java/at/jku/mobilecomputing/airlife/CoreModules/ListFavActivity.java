@@ -202,7 +202,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
                 if (currentWeatherInfo.getHumidity() != null)
                     favouriteListDataSet.setHumidity(Double.parseDouble(currentWeatherInfo.getHumidity()));
                 if (currentWeatherInfo.getCurrentTemperature() != null)
-                    favouriteListDataSet.setTemperature(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()));
+                    favouriteListDataSet.setTemperature(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F);
                 if (currentWeatherInfo.getPressure() != null)
                     favouriteListDataSet.setPressure(Double.parseDouble(currentWeatherInfo.getPressure()));
                 if (currentWeatherInfo.getWindSpeed() != null)

@@ -378,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //WAQI waqi = data.getWaqi();
                 try {
                     if (currentWeatherInfo.getCurrentTemperature() != null)
-                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
                     if (currentWeatherInfo.getPressure() != null)
                         pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
                     if (currentWeatherInfo.getHumidity() != null)
@@ -476,8 +476,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //WAQI waqi = data.getWaqi();
                 try {
                     if (currentWeatherInfo.getCurrentTemperature() != null)
-                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - 273.15F));
                     if (currentWeatherInfo.getPressure() != null)
                         pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
                     if (currentWeatherInfo.getHumidity() != null)
