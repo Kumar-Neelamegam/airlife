@@ -78,14 +78,14 @@ public class PredictionActivity extends AppCompatActivity {
         stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE currentLongitude NUMERIC");
         stringBuilder.append(newLine);
-        /*stringBuilder.append("@ATTRIBUTE temperature NUMERIC");
+        stringBuilder.append("@ATTRIBUTE temperature NUMERIC");
         stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE humidity NUMERIC");
         stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE pressure NUMERIC");
         stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE wind NUMERIC");
-        stringBuilder.append(newLine);*/
+        stringBuilder.append(newLine);
         stringBuilder.append("@ATTRIBUTE class {good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous}");
         stringBuilder.append(newLine);
 
@@ -103,17 +103,17 @@ public class PredictionActivity extends AppCompatActivity {
             stringBuilder.append(aqiDataSet.getCurrentLongitude());
             stringBuilder.append(lineSeparator);
 
-            /*stringBuilder.append(aqiDataSet.getTemperature().split(" ")[0].replace(",", "."));
+            stringBuilder.append(aqiDataSet.getTemperature());
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getHumidity().replace("%", "").replace(",", "."));
+            stringBuilder.append(aqiDataSet.getHumidity());
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getPressure().split(" ")[0].replace(",", "."));
+            stringBuilder.append(aqiDataSet.getPressure());
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getWind().split(" ")[0].replace(",", "."));
-            stringBuilder.append(lineSeparator);*/
+            stringBuilder.append(aqiDataSet.getWind());
+            stringBuilder.append(lineSeparator);
 
             stringBuilder.append(getclassName(aqiDataSet.getAirquality()));
             stringBuilder.append(newLine);

@@ -54,5 +54,6 @@
     <string name="msg_nonetworkconnection">Netzwerk nicht verbunden !!</string>
     <string name="no_network_connection">Kein Netzwerk verfügbar!!</string>
     <string name="no_data_found">Keine Daten gefunden..</string>
+    <string name="fav_loading_msg">Loading air quality for your favourite list...</string>
 
 </resources>

@@ -23,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -132,7 +134,7 @@ public class Common {
      * @param longitude
      * @param apiFullResponse
      */
-    public  static void InserttoDB(Context ctx, Data data, String latitude, String longitude, String apiFullResponse) {
+    public static void InserttoDB(Context ctx, Data data, String latitude, String longitude, String apiFullResponse, CurrentWeatherInfo currentWeatherInfo) {
         try {
             AqiDataSet aqiDataSet=new AqiDataSet();
             aqiDataSet.setFullResponse(apiFullResponse);
@@ -143,14 +145,18 @@ public class Common {
             aqiDataSet.setCity(data.getCity().getName());
             aqiDataSet.setAddress(data.getCity().getUrl());
             aqiDataSet.setDatetime(String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
-            double temperature=data.getWaqi().getTemperature()!=null? data.getWaqi().getTemperature().getV(): 0;
-            double humidity=data.getWaqi().getHumidity()!=null? data.getWaqi().getHumidity().getV():0;
-            double pressure=data.getWaqi().getPressure()!=null? data.getWaqi().getPressure().getV():0;
-            double wind=data.getWaqi().getWind()!=null? data.getWaqi().getWind().getV():0;
-            aqiDataSet.setTemperature(ctx.getString(R.string.temperature_unit_celsius,temperature));
-            aqiDataSet.setHumidity(ctx.getString(R.string.humidity_unit,humidity));
-            aqiDataSet.setPressure(ctx.getString(R.string.pressure_unit, pressure));
-            aqiDataSet.setWind(ctx.getString(R.string.wind_unit, wind));
+            //double temperature=data.getWaqi().getTemperature()!=null? data.getWaqi().getTemperature().getV(): 0;
+            //double humidity=data.getWaqi().getHumidity()!=null? data.getWaqi().getHumidity().getV():0;
+            //double pressure=data.getWaqi().getPressure()!=null? data.getWaqi().getPressure().getV():0;
+            //double wind=data.getWaqi().getWind()!=null? data.getWaqi().getWind().getV():0;
+            String temperature = currentWeatherInfo.getCurrentTemperature() != null ? currentWeatherInfo.getCurrentTemperature() : "0";
+            String humidity = currentWeatherInfo.getHumidity() != null ? currentWeatherInfo.getHumidity() : "0";
+            String pressure = currentWeatherInfo.getPressure() != null ? currentWeatherInfo.getPressure() : "0";
+            String wind = currentWeatherInfo.getWindSpeed() != null ? currentWeatherInfo.getWindSpeed() : "0";
+            aqiDataSet.setTemperature(temperature);
+            aqiDataSet.setHumidity(humidity);
+            aqiDataSet.setPressure(pressure);
+            aqiDataSet.setWind(wind);
             insertAQIData(aqiDataSet,ctx);
 
         } catch (Exception e) {

@@ -29,6 +29,9 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
+import com.ftoslab.openweatherretrieverz.WeatherCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -343,26 +346,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //TODO: Find better implementation
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
                         Common.setAQIScaleGroup(data, circleBackground, this);
-                        WAQI waqi = data.getWaqi();
-                        try {
-                            if (waqi.getTemperature().getV() != null)
-                                sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                            temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                            if (waqi.getPressure() != null)
-                                pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                            if (waqi.getHumidity() != null)
-                                humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                            if (waqi.getWind() != null)
-                                windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        setWeatherInfo(latitude, longitude);
                         locationTextView.setText(data.getCity().getName());
                         //setupAttributions(data);
                         addPollutantsToList(data.getWaqi());
                         pollutantsAdapter.notifyDataSetChanged();
                         Common.updateWidget(this);
-                        Common.InserttoDB(MainActivity.this, data, latitude, longitude, apiFullResponse);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -373,6 +362,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void setWeatherInfo(String lat, String lng) {
+
+        // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+            /*
+            You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
+            */
+        retriever.updateCurrentWeatherInfo(Double.parseDouble(lat), Double.parseDouble(lng), new WeatherCallback() {
+            @Override
+            public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                // Your code here
+                //Toast.makeText(MainActivity.this, currentWeatherInfo.toString(), Toast.LENGTH_SHORT).show();
+
+                //WAQI waqi = data.getWaqi();
+                try {
+                    if (currentWeatherInfo.getCurrentTemperature() != null)
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                    if (currentWeatherInfo.getPressure() != null)
+                        pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
+                    if (currentWeatherInfo.getHumidity() != null)
+                        humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
+                    if (currentWeatherInfo.getWindSpeed() != null)
+                        windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
+
+                    Common.InserttoDB(MainActivity.this, data, lat, lng, apiFullResponse, currentWeatherInfo);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+            }
+        });
+        /*retriever.updateDailyForecastInfo(currentLatitude, currentLongitude, new DailyForecastCallback() {
+            @Override
+            public void onReceiveDailyForecastInfoList(List<DailyForecastInfo> dailyForecastInfoList) {
+                // Your code here
+                Toast.makeText(MainActivity.this, dailyForecastInfoList.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e( "updateDailyForecastInfo-onFailure: ", error);
+            }
+        });*/
+
+    }
 
     /**
      * Get air quality data by using network ip
@@ -394,7 +437,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //TODO: Find better implementation
                     sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
                     Common.setAQIScaleGroup(data, circleBackground, this);
-                    WAQI waqi = data.getWaqi();
+                    setWeatherInfo();
+                  /*  WAQI waqi = data.getWaqi();
                     if (waqi.getTemperature() != null)
                         temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
                     if (waqi.getPressure() != null)
@@ -402,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (waqi.getHumidity() != null)
                         humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
                     if (waqi.getWind() != null)
-                        windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                        windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));*/
                     locationTextView.setText(data.getCity().getName());
                     // setupAttributions(data);
                     addPollutantsToList(data.getWaqi());
@@ -414,6 +458,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
     }
+
+
+    private void setWeatherInfo() {
+
+        // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+            /*
+            You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
+            */
+        retriever.updateCurrentWeatherInfo(currentLatitude, currentLongitude, new WeatherCallback() {
+            @Override
+            public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                // Your code here
+                //Toast.makeText(MainActivity.this, currentWeatherInfo.toString(), Toast.LENGTH_SHORT).show();
+
+                //WAQI waqi = data.getWaqi();
+                try {
+                    if (currentWeatherInfo.getCurrentTemperature() != null)
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature())));
+                    if (currentWeatherInfo.getPressure() != null)
+                        pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
+                    if (currentWeatherInfo.getHumidity() != null)
+                        humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
+                    if (currentWeatherInfo.getWindSpeed() != null)
+                        windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
+
+                    Common.InserttoDB(MainActivity.this, data, String.valueOf(currentLatitude), String.valueOf(currentLongitude), apiFullResponse, currentWeatherInfo);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+            }
+        });
+        /*retriever.updateDailyForecastInfo(currentLatitude, currentLongitude, new DailyForecastCallback() {
+            @Override
+            public void onReceiveDailyForecastInfoList(List<DailyForecastInfo> dailyForecastInfoList) {
+                // Your code here
+                Toast.makeText(MainActivity.this, dailyForecastInfoList.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e( "updateDailyForecastInfo-onFailure: ", error);
+            }
+        });*/
+
+    }
+
+
 
 
     @Override

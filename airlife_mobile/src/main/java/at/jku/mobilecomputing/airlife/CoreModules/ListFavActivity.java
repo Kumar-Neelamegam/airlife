@@ -15,6 +15,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
+import com.ftoslab.openweatherretrieverz.WeatherCallback;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -25,7 +28,6 @@ import at.jku.mobilecomputing.airlife.BuildConfig;
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Database.FavData.FavouriteListDataSet;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
-import at.jku.mobilecomputing.airlife.NetworkUtils.APIInterface;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
@@ -45,8 +47,6 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     private final String apiKey = BuildConfig.ApiKey;
     List<FavouriteListDataSet> result = new ArrayList<>();
     List<FavouriteListDataSet> favouriteListObjects;
-    private RetrofitHelper mRetrofitHelper;
-    private APIInterface mApiInterface;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
         favouriteListObjects = new ArrayList<>();
         favouriteListObjects = Common.getAllFavouriteDataSet(ListFavActivity.this);
-        showDialog("Loading data from nearest station...");
+        showDialog(getResources().getString(R.string.fav_loading_msg));
 
         for (FavouriteListDataSet favouriteListObject : favouriteListObjects) {
             getAqiDataFromLatitudeLongitude(favouriteListObject.getLatitude(), favouriteListObject.getLongitude(), favouriteListObject.getLocation(), favouriteListObjects.size());
@@ -151,7 +151,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
             RetrofitHelper.getInstance().getApiInterface().getLocationAQI(geo, apiKey).enqueue(new Callback<APIResponse>() {
                 @Override
                 public void onResponse(Call<APIResponse> call, Response<APIResponse> response) {
-                    dismissDialog();
+
                     Data data = new Data();
                     data = response.body().getData();
                     FavouriteListDataSet favouriteListDataSet = new FavouriteListDataSet();
@@ -171,19 +171,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
                         favouriteListDataSet.setPm25(data.getWaqi().getPm2_5().getV());
                     if (data.getWaqi().getSo2() != null)
                         favouriteListDataSet.setSo2(data.getWaqi().getSo2().getV());
-                    if (data.getWaqi().getHumidity() != null)
-                        favouriteListDataSet.setHumidity(data.getWaqi().getHumidity().getV());
-                    if (data.getWaqi().getTemperature() != null)
-                        favouriteListDataSet.setTemperature(data.getWaqi().getTemperature().getV());
-                    if (data.getWaqi().getPressure() != null)
-                        favouriteListDataSet.setPressure(data.getWaqi().getPressure().getV());
-                    if (data.getWaqi().getWind() != null)
-                        favouriteListDataSet.setWind(data.getWaqi().getWind().getV());
-
-                    result.add(favouriteListDataSet);
-                    if (totalSize == result.size()) {
-                        LoadData(result);
-                    }
+                    setWeatherInfo(favouriteListDataSet, totalSize, latitude, longitude);
                 }
 
 
@@ -199,6 +187,42 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setWeatherInfo(FavouriteListDataSet favouriteListDataSet, int totalSize, double latitude, double longitude) {
+
+        // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ("df21ec7ffa6b60adcee1e9f722b1e46d");
+            /*
+            You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
+            */
+        retriever.updateCurrentWeatherInfo(latitude, longitude, new WeatherCallback() {
+            @Override
+            public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                if (currentWeatherInfo.getHumidity() != null)
+                    favouriteListDataSet.setHumidity(Double.parseDouble(currentWeatherInfo.getHumidity()));
+                if (currentWeatherInfo.getCurrentTemperature() != null)
+                    favouriteListDataSet.setTemperature(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()));
+                if (currentWeatherInfo.getPressure() != null)
+                    favouriteListDataSet.setPressure(Double.parseDouble(currentWeatherInfo.getPressure()));
+                if (currentWeatherInfo.getWindSpeed() != null)
+                    favouriteListDataSet.setWind(Double.parseDouble(currentWeatherInfo.getWindSpeed()));
+
+                result.add(favouriteListDataSet);
+                if (totalSize == result.size()) {
+                    LoadData(result);
+                    dismissDialog();
+                }
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+            }
+        });
+
     }
 
     private void showDialog(String s) {
