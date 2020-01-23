@@ -2,11 +2,15 @@ package at.jku.mobilecomputing.machinelearning;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.Calendar;
+import java.util.Date;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -152,17 +156,36 @@ public class Prediction {
 
             //build current dataset
             if (dataRaw != null) dataRaw.clear();
-            double timestamp1 = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());//Current timestamp
-            double[] instanceValue1 = new double[]{timestamp1, currentLatitude, currentLongitude};//Current latitude & Current Longitude
+            //Morning
+            double[] instanceValue1 = new double[]{getTomorrowTimeStamp("09:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
+                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
+            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+
+            //Afternoon
+            instanceValue1 = new double[]{getTomorrowTimeStamp("01:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
+                    Double.parseDouble(current_wind), Double.parseDouble(current_humd + 80)};//Current latitude & Current Longitude
+            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+
+            //Evening
+            instanceValue1 = new double[]{getTomorrowTimeStamp("05:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
+                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
+            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+
+            //Night
+            instanceValue1 = new double[]{getTomorrowTimeStamp("09:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
+                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
             dataRaw.add(new DenseInstance(1.0, instanceValue1));
 
             //classify
             Classifier cls = null;
             try {
-                cls = classifier_result;
-                String result = (String) classVal.get((int) cls.classifyInstance(dataRaw.firstInstance()));
-                Log.e("Final prediction result: ", result);
-                Log.e("Final prediction result: ", result);
+                for (int i = 0; i < dataRaw.size(); i++) {
+                    cls = classifier_result;
+                    String result = (String) classVal.get((int) cls.classifyInstance(dataRaw.instance(i)));
+                    Log.e("Final prediction result: ", result);
+                    Toast.makeText(context, "results:" + result, Toast.LENGTH_SHORT).show();
+                }
+
             } catch (Exception ex) {
                 Log.e("modelClassifier", ex.getMessage());
             }
@@ -170,6 +193,36 @@ public class Prediction {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private double getTomorrowTimeStamp(String time) throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        String dateString = tomorrowDate() + " " + time;
+        //formatting the dateString to convert it into a Date
+        Date date = sdf.parse(dateString);
+        calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        System.out.println("Given Time in milliseconds : " + calendar.getTimeInMillis());
+        return calendar.getTimeInMillis();
+    }
+
+    public String tomorrowDate() {
+        Date todayDate = new Date();
+        Date tomorrowDate = null;
+        if (todayDate != null) {
+            Calendar c = Calendar.getInstance();
+            c.setTime(todayDate); // Setting the today date
+            c.add(Calendar.DATE, 1); // Increasing 1 day
+            tomorrowDate = c.getTime();
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String formatedDate = null;
+        if (tomorrowDate != null) {
+            formatedDate = sdf.format(tomorrowDate);
+        }
+        System.out.println(formatedDate);
+        return formatedDate;
     }
 
     //**************************************************************************************************

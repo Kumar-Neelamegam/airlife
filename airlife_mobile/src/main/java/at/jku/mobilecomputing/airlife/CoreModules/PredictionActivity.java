@@ -107,16 +107,16 @@ public class PredictionActivity extends AppCompatActivity {
             stringBuilder.append(aqiDataSet.getCurrentLongitude());
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getTemperature());
+            stringBuilder.append(aqiDataSet.getTemperature().replace(",", "."));//fix for german locale
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getHumidity());
+            stringBuilder.append(aqiDataSet.getHumidity().replace(",", "."));//fix for german locale
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getPressure());
+            stringBuilder.append(aqiDataSet.getPressure().replace(",", "."));//fix for german locale
             stringBuilder.append(lineSeparator);
 
-            stringBuilder.append(aqiDataSet.getWind());
+            stringBuilder.append(aqiDataSet.getWind().replace(",", "."));//fix for german locale
             stringBuilder.append(lineSeparator);
 
             stringBuilder.append(getclassName(aqiDataSet.getAirquality()));
@@ -135,10 +135,10 @@ public class PredictionActivity extends AppCompatActivity {
             retriever.updateCurrentWeatherInfo(lat, lng, new WeatherCallback() {
                 @Override
                 public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
-                    String current_temp = String.valueOf(Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius);
-                    String current_pressure = currentWeatherInfo.getPressure();
-                    String current_humd = currentWeatherInfo.getHumidity();
-                    String current_wind = currentWeatherInfo.getWindSpeed();
+                    String current_temp = getString(R.string.temperature_unit_celsius_2, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius);
+                    String current_pressure = getString(R.string.pressure_unit_2, Double.parseDouble(currentWeatherInfo.getPressure()));
+                    String current_humd = getString(R.string.humidity_unit_2, Double.parseDouble(currentWeatherInfo.getHumidity()));
+                    String current_wind = getString(R.string.wind_unit_2, Double.parseDouble(currentWeatherInfo.getWindSpeed()));
                     Prediction prediction = new Prediction();
                     prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, current_temp, current_pressure, current_humd, current_wind);
                 }

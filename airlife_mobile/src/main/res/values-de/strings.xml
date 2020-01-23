@@ -40,6 +40,12 @@
     <string name="pressure_unit">%1$.1f mb</string>
     <string name="wind_unit">%1$.1f m/s</string>
 
+
+    <string name="temperature_unit_celsius_2">%1$.1f</string>
+    <string name="humidity_unit_2">%1$.0f</string>
+    <string name="pressure_unit_2">%1$.1f</string>
+    <string name="wind_unit_2">%1$.1f</string>
+
     <string name="place_holder">---</string>
     <string name="pressure">Druck</string>
     <string name="humidity">Luftfeuchtigkeit</string>
