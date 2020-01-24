@@ -28,7 +28,6 @@ import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import at.jku.mobilecomputing.airlife.Database.AirLifeDatabaseClient;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDAO;
@@ -44,7 +43,7 @@ public class Common {
 
     public static String openWeatherKey = "df21ec7ffa6b60adcee1e9f722b1e46d";
     public static double KelvinToCelcius = 273.15F;
-    public static String deafultLanguage = "en";
+    public static String defaultLanguage = "en";
     public static String germanLanguage = "de";
 
     public static String getscalefromquality(Integer aqi, Context ctx) {
@@ -150,7 +149,7 @@ public class Common {
             aqiDataSet.setCurrentLongitude(longitude);
             aqiDataSet.setCity(data.getCity().getName());
             aqiDataSet.setAddress(data.getCity().getUrl());
-            aqiDataSet.setDatetime(String.valueOf(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
+            aqiDataSet.setDatetime(String.valueOf(System.currentTimeMillis()));
             //double temperature=data.getWaqi().getTemperature()!=null? data.getWaqi().getTemperature().getV(): 0;
             //double humidity=data.getWaqi().getHumidity()!=null? data.getWaqi().getHumidity().getV():0;
             //double pressure=data.getWaqi().getPressure()!=null? data.getWaqi().getPressure().getV():0;
@@ -159,10 +158,10 @@ public class Common {
             String humidity = currentWeatherInfo.getHumidity() != null ? currentWeatherInfo.getHumidity() : "0";
             String pressure = currentWeatherInfo.getPressure() != null ? currentWeatherInfo.getPressure() : "0";
             String wind = currentWeatherInfo.getWindSpeed() != null ? currentWeatherInfo.getWindSpeed() : "0";
-            aqiDataSet.setTemperature(String.valueOf(Double.parseDouble(temperature) - Common.KelvinToCelcius));
-            aqiDataSet.setHumidity(humidity);
-            aqiDataSet.setPressure(pressure);
-            aqiDataSet.setWind(wind);
+            aqiDataSet.setTemperature(ctx.getResources().getString(R.string.temperature_unit_celsius_2, Double.parseDouble(temperature) - Common.KelvinToCelcius));
+            aqiDataSet.setHumidity(ctx.getResources().getString(R.string.humidity_unit_2, Double.parseDouble(humidity)));
+            aqiDataSet.setPressure(ctx.getResources().getString(R.string.pressure_unit_2, Double.parseDouble(pressure)));
+            aqiDataSet.setWind(ctx.getResources().getString(R.string.wind_unit_2, Double.parseDouble(wind)));
             insertAQIData(aqiDataSet,ctx);
 
         } catch (Exception e) {

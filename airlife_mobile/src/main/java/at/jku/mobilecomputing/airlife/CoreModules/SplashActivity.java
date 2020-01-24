@@ -44,7 +44,7 @@ public class SplashActivity extends CoreActivity {
     public void onPermissionsGranted(int requestCode) {
 
         try {
-            Lingver.init(getApplication(), Common.deafultLanguage);
+            Lingver.init(getApplication(), Common.defaultLanguage);
 
             sharedPrefUtils = SharedPrefUtils.getInstance(this);
             if (!sharedPrefUtils.getLatestLanguage().equals("")) {

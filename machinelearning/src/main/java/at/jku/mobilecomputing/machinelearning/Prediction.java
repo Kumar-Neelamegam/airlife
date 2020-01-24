@@ -1,8 +1,11 @@
 package at.jku.mobilecomputing.machinelearning;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.shashank.sony.fancygifdialoglib.FancyGifDialog;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -29,8 +33,10 @@ public class Prediction {
     Context context;
     double currentLatitude, currentLongitude;
     String ModelPath = "";
+    FancyGifDialog fancyGifDialog;
+    List resultList = new ArrayList();
 
-    public void loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng, String current_temp, String current_pressure, String current_humd, String current_wind) {
+    public List loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng, ArrayList<WeatherInfo> weatherInfo) {
 
 
         Filter filter = new Normalize();
@@ -43,6 +49,7 @@ public class Prediction {
         currentLongitude = lng;
 
         try {
+            // callDialog("Prediction Inprocess","Using machine learning techniques to get the best result of Air Quality..", R.drawable.classifying);
             //1. Loading training dataset
             loader = new ArffLoader();
             loader.setSource(arffFile);
@@ -63,7 +70,9 @@ public class Prediction {
             //ModelPath = root.getPath() + "/generated.model";
 
             //5. classification using the generated model
-            modelClassifier(classifier_result, current_temp, current_pressure, current_humd, current_wind);
+            resultList = modelClassifier(classifier_result, weatherInfo);
+
+            return resultList;
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,7 +80,18 @@ public class Prediction {
             e.printStackTrace();
         }
 
+        return resultList;
+    }
 
+
+    public void callDialog(String title, String message, int drw) {
+        fancyGifDialog = new FancyGifDialog.Builder((Activity) context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveBtnBackground("#FF4081")
+                .setGifResource(drw)   //Pass your Gif here
+                .isCancellable(true)
+                .build();
     }
 
     //**************************************************************************************************
@@ -122,7 +142,7 @@ public class Prediction {
     }
 
     //5. classification using the generated model
-    public void modelClassifier(Classifier classifier_result, String current_temp, String current_pressure, String current_humd, String current_wind) {
+    public List modelClassifier(Classifier classifier_result, ArrayList<WeatherInfo> weatherInfo) {
         try {
             ArrayList attributes = new ArrayList();
             ArrayList classVal = new ArrayList();
@@ -132,9 +152,10 @@ public class Prediction {
             Attribute latitude = new Attribute("currentLatitude");
             Attribute longitude = new Attribute("currentLongitude");
             Attribute temperature = new Attribute("temperature");
+            Attribute humidity = new Attribute("humidity");
             Attribute pressure = new Attribute("pressure");
             Attribute wind = new Attribute("wind");
-            Attribute humidity = new Attribute("humidity");
+
 
             classVal.add("good");
             classVal.add("moderate");
@@ -146,9 +167,10 @@ public class Prediction {
             attributes.add(latitude);
             attributes.add(longitude);
             attributes.add(temperature);
+            attributes.add(humidity);
             attributes.add(pressure);
             attributes.add(wind);
-            attributes.add(humidity);
+
 
             attributes.add(new Attribute("class", classVal));
             dataRaw = new Instances("TestInstances", attributes, 0);
@@ -156,36 +178,31 @@ public class Prediction {
 
             //build current dataset
             if (dataRaw != null) dataRaw.clear();
-            //Morning
-            double[] instanceValue1 = new double[]{getTomorrowTimeStamp("09:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
-                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
-            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+            for (WeatherInfo info : weatherInfo) {
+                double temperatureValue = Double.parseDouble(info.getTemperature());
+                double humidityValue = Double.parseDouble(info.getHumidity());
+                double pressureValue = Double.parseDouble(info.getPressure());
+                double windValue = Double.parseDouble(info.getWind());
+                long timestamp1 = info.getTimestamp();
 
-            //Afternoon
-            instanceValue1 = new double[]{getTomorrowTimeStamp("01:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
-                    Double.parseDouble(current_wind), Double.parseDouble(current_humd + 80)};//Current latitude & Current Longitude
-            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+                double[] instanceValue1 = new double[]{timestamp1, currentLatitude, currentLongitude, temperatureValue, humidityValue, pressureValue, windValue};//Current latitude & Current Longitude
+                dataRaw.add(new DenseInstance(1.0, instanceValue1));
 
-            //Evening
-            instanceValue1 = new double[]{getTomorrowTimeStamp("05:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
-                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
-            dataRaw.add(new DenseInstance(1.0, instanceValue1));
-
-            //Night
-            instanceValue1 = new double[]{getTomorrowTimeStamp("09:00:00"), currentLatitude, currentLongitude, Double.parseDouble(current_temp), Double.parseDouble(current_pressure),
-                    Double.parseDouble(current_wind), Double.parseDouble(current_humd)};//Current latitude & Current Longitude
-            dataRaw.add(new DenseInstance(1.0, instanceValue1));
+            }
 
             //classify
             Classifier cls = null;
             try {
+                resultList = new ArrayList();
                 for (int i = 0; i < dataRaw.size(); i++) {
                     cls = classifier_result;
                     String result = (String) classVal.get((int) cls.classifyInstance(dataRaw.instance(i)));
                     Log.e("Final prediction result: ", result);
                     Toast.makeText(context, "results:" + result, Toast.LENGTH_SHORT).show();
+                    resultList.add(result);
                 }
 
+                return resultList;
             } catch (Exception ex) {
                 Log.e("modelClassifier", ex.getMessage());
             }
@@ -193,11 +210,12 @@ public class Prediction {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return resultList;
     }
 
     private double getTomorrowTimeStamp(String time) throws ParseException {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm");
         String dateString = tomorrowDate() + " " + time;
         //formatting the dateString to convert it into a Date
         Date date = sdf.parse(dateString);
@@ -227,7 +245,8 @@ public class Prediction {
 
     //**************************************************************************************************
 
-
 }
+
+
 
 

@@ -1,20 +1,32 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
+import android.app.AlertDialog;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 
-import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+import com.ftoslab.openweatherretrieverz.DailyForecastCallback;
+import com.ftoslab.openweatherretrieverz.DailyForecastInfo;
 import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
-import com.ftoslab.openweatherretrieverz.WeatherCallback;
+import com.github.ybq.android.spinkit.SpinKitView;
+import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.github.ybq.android.spinkit.style.CubeGrid;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import at.jku.mobilecomputing.airlife.Constants.Common;
@@ -24,12 +36,14 @@ import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import at.jku.mobilecomputing.machinelearning.Prediction;
+import at.jku.mobilecomputing.machinelearning.WeatherInfo;
 
 public class PredictionActivity extends AppCompatActivity {
 
     private SharedPrefUtils sharedPrefUtils;
     double lat;
     double lng;
+    List resultList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +68,8 @@ public class PredictionActivity extends AppCompatActivity {
         createModelARFF(aqiDataSets);
 
     }
+
+    AlertDialog alertDialog;
 
     /**
      * Create a training dataset from the local room database - step 1
@@ -123,30 +139,50 @@ public class PredictionActivity extends AppCompatActivity {
             stringBuilder.append(newLine);
         }
 
-        Log.e("createModelARFF: ", stringBuilder.toString());
+        // Log.e("createModelARFF: ", stringBuilder.toString());
 
         InputStream arffFile = new ByteArrayInputStream(stringBuilder.toString().getBytes());
 
 
         try {
+            //load progress
+            //calling this method to show our android custom alert dialog
+            showCustomDialog("Prediction Inprogress", "Using machine learning to get the best results...");
             // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
             OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
 
-            retriever.updateCurrentWeatherInfo(lat, lng, new WeatherCallback() {
+
+            retriever.updateDailyForecastInfo(lat, lng, new DailyForecastCallback() {
                 @Override
-                public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
-                    String current_temp = getString(R.string.temperature_unit_celsius_2, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius);
-                    String current_pressure = getString(R.string.pressure_unit_2, Double.parseDouble(currentWeatherInfo.getPressure()));
-                    String current_humd = getString(R.string.humidity_unit_2, Double.parseDouble(currentWeatherInfo.getHumidity()));
-                    String current_wind = getString(R.string.wind_unit_2, Double.parseDouble(currentWeatherInfo.getWindSpeed()));
+                public void onReceiveDailyForecastInfoList(List<DailyForecastInfo> dailyForecastInfoList) {
+                    // Your code here
+                    // Toast.makeText(PredictionActivity.this, dailyForecastInfoList.toString(), Toast.LENGTH_SHORT).show();
+                    ArrayList<WeatherInfo> weatherInfo = new ArrayList<WeatherInfo>();
+                    WeatherInfo weatherInfo1 = new WeatherInfo();
+
+                    for (DailyForecastInfo dailyForecastInfo : dailyForecastInfoList) {
+                        String current_temp = getString(R.string.temperature_unit_celsius_2, Double.parseDouble(dailyForecastInfo.getDailyAverageTemperature()) - Common.KelvinToCelcius);
+                        String current_pressure = getString(R.string.pressure_unit_2, Double.parseDouble(dailyForecastInfo.getAveragePressure()));
+                        String current_humd = getString(R.string.humidity_unit_2, Double.parseDouble(dailyForecastInfo.getAverageHumidity()));
+                        String current_wind = getString(R.string.wind_unit_2, Double.parseDouble(dailyForecastInfo.getAverageWindSpeed()));
+                        weatherInfo1 = new WeatherInfo();
+                        weatherInfo1.setTemperature(current_temp);//temp
+                        weatherInfo1.setPressure(current_pressure);//pressure
+                        weatherInfo1.setHumidity(current_humd);//humidity
+                        weatherInfo1.setWind(current_wind);//windspeed
+                        weatherInfo1.setTimestamp(dailyForecastInfo.getDateCalendar().getTimeInMillis());
+                        //Getting entries
+                        weatherInfo.add(weatherInfo1);
+                    }
                     Prediction prediction = new Prediction();
-                    prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, current_temp, current_pressure, current_humd, current_wind);
+                    resultList = prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, weatherInfo);
+                    prepareUiList(lat, lng, dailyForecastInfoList);
                 }
 
                 @Override
                 public void onFailure(String error) {
                     // Your code here
-                    Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+                    Log.e("updateDailyForecastInfo-onFailure: ", error);
                 }
             });
 
@@ -158,6 +194,88 @@ public class PredictionActivity extends AppCompatActivity {
 
 
     }
+
+    private void prepareUiList(double lat, double lng, List<DailyForecastInfo> dailyForecastInfoList) {
+
+        // Parent layout
+        LinearLayout parentLayout = findViewById(R.id.bindingview);
+
+        // Layout inflater
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View view;
+        int sno = 0;
+        String[] days = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+        for (int i = 0; i < dailyForecastInfoList.size(); i++) {
+            // Add the text layout to the parent layout
+            view = layoutInflater.inflate(R.layout.row_item_predict, parentLayout, false);
+            // fill in any details dynamically here
+            TextView txtvwSno = view.findViewById(R.id.txtvw_sno);
+            TextView txtvwDay = view.findViewById(R.id.txtvw_day);
+            TextView txtvwDateinfo = view.findViewById(R.id.txtvw_dateinfo);
+            TextView txtvwLocationinfo = view.findViewById(R.id.txtvw_locationinfo);
+            TextView predictTemp = view.findViewById(R.id.predict_temp);
+            TextView predictPressure = view.findViewById(R.id.predict_pressure);
+            TextView predictHumid = view.findViewById(R.id.predict_humid);
+            TextView predictWind = view.findViewById(R.id.predict_wind);
+            LinearLayout predaqibg = view.findViewById(R.id.predaqibg);
+            TextView txtairquality = view.findViewById(R.id.txtairquality);
+            ImageView imgvwAirqualityscale = view.findViewById(R.id.imgvw_airqualityscale);
+            // Add the text view to the parent layout
+            txtvwSno.setText(String.valueOf(sno + 1));
+            txtvwDay.setText(days[i]);
+            Calendar calendar = dailyForecastInfoList.get(i).getDateCalendar();
+            txtvwDateinfo.setText(calendar.getTime().toGMTString());
+            txtvwLocationinfo.setText("");
+            predictTemp.setText(dailyForecastInfoList.get(i).getDailyAverageTemperature());
+            predictPressure.setText(dailyForecastInfoList.get(i).getAveragePressure());
+            predictHumid.setText(dailyForecastInfoList.get(i).getAverageHumidity());
+            predictWind.setText(dailyForecastInfoList.get(i).getAverageWindSpeed());
+            txtairquality.setText(resultList.get(i).toString());
+
+            parentLayout.addView(view);
+            sno++;
+        }
+
+
+        //cancel progress
+        alertDialog.dismiss();
+        Toast.makeText(this, R.string.predictsuccess, Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void showCustomDialog(String titletxt, String messagetxt) {
+        //before inflating the custom alert dialog layout, we will get the current activity viewgroup
+        ViewGroup viewGroup = findViewById(android.R.id.content);
+
+        //then we will inflate the custom alert dialog xml that we created
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.my_dialog, viewGroup, false);
+
+        SpinKitView spinKitView = dialogView.findViewById(R.id.dgprogressBar);
+        Sprite animate = new CubeGrid();
+        spinKitView.setIndeterminateDrawable(animate);
+        TextView title, message;
+        ImageView logo;
+        title = dialogView.findViewById(R.id.dgtitle);
+        message = dialogView.findViewById(R.id.dgmessage);
+        logo = dialogView.findViewById(R.id.logo);
+
+        title.setText(titletxt);
+        message.setText(messagetxt);
+
+
+        //Now we need an AlertDialog.Builder object
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        //setting the view of the builder to our custom view that we already inflated
+        builder.setView(dialogView);
+
+
+        //finally creating the alert dialog and displaying it
+        alertDialog = builder.create();
+        alertDialog.show();
+    }
+
 
     private String getclassName(int aqi) {
         String returnValue = "good";
@@ -201,7 +319,7 @@ public class PredictionActivity extends AppCompatActivity {
         setUPTheme();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle("Air Life - Prediction");
+        getSupportActionBar().setTitle(getResources().getString(R.string.predictionTitle));
     }
 
     public void setUPTheme() {
@@ -233,5 +351,5 @@ public class PredictionActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-}
 
+}

@@ -60,6 +60,14 @@
     <string name="msg_nonetworkconnection">Netzwerk nicht verbunden !!</string>
     <string name="no_network_connection">Kein Netzwerk verfügbar!!</string>
     <string name="no_data_found">Keine Daten gefunden..</string>
-    <string name="fav_loading_msg">Loading air quality for your favourite list...</string>
+    <string name="fav_loading_msg">Luftqualität für Ihre Favoritenliste wird geladen ... </string>
+    <string name="loadingmain">Daten von der nächsten Station werden geladen ...</string>
+    <string name="nolist">Keine Liste gefunden. </string>
+    <string name="pleasewait">Bitte warten ... wird aktualisiert ...</string>
 
+    <string name="languageupdate">Sprache auf Deutsch aktualisiert</string>
+    <string name="loading">Informationen werden geladen. Warten Sie mal. </string>
+    <string name="favTitle">Air Life - Favoritenliste</string>
+    <string name="predictionTitle">Air Life - Vorhersage</string>
+    <string name="predictsuccess">Erfolgreich vorhergesagt</string>
 </resources>

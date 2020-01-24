@@ -6,7 +6,6 @@ import android.support.wearable.view.DelayedConfirmationView;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 public class WearActivity extends WearableActivity {
 
@@ -18,12 +17,12 @@ public class WearActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+        final WatchViewStub stub = findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                button = (Button) stub.findViewById(R.id.button);
-                delayedView = (DelayedConfirmationView) stub.findViewById(R.id.delayedView);
+                button = stub.findViewById(R.id.button);
+                delayedView = stub.findViewById(R.id.delayedView);
                 delayedView.setTotalTimeMs(3000);
                 showOnlyButton();
             }
