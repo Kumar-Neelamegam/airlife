@@ -60,5 +60,9 @@
     <string name="no_network_connection">No network available!!</string>
     <string name="no_data_found">No data found..</string>
     <string name="fav_loading_msg">Loading air quality for your favourite list...</string>
-
+    <string name="loadingmain">Loading data from nearest station...</string>
+    <string name="nolist">No list found..</string>
+    <string name="pleasewait">Please wait.. refreshing..</string>
+    <string name="languageupdate">Language updated to german</string>
+    <string name="loading">Loading Information..Please wait..</string>
 </resources>

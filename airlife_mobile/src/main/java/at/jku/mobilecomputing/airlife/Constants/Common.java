@@ -44,7 +44,7 @@ public class Common {
 
     public static String openWeatherKey = "df21ec7ffa6b60adcee1e9f722b1e46d";
     public static double KelvinToCelcius = 273.15F;
-    public static String deafultLanguage = "en";
+    public static String defaultLanguage = "en";
     public static String germanLanguage = "de";
 
     public static String getscalefromquality(Integer aqi, Context ctx) {

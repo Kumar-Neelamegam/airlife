@@ -332,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
                 if (status != null) {
                     if (status == Status.FETCHING) {
-                        showDialog("Loading data from nearest station...");
+                        showDialog(getResources().getString(R.string.loadingmain));
                     } else dismissDialog();
                 }
             });
@@ -425,7 +425,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
                 if (status != null) {
                     if (status == Status.FETCHING) {
-                        showDialog("Loading Information..Please wait..");
+                        showDialog(getResources().getString(R.string.loading));
                     } else dismissDialog();
                 }
             });
@@ -516,8 +516,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -565,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (count > 0) {
                     startActivity(new Intent(this, ListFavActivity.class));
                 } else {
-                    Toast.makeText(this, "No list found..", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getResources().getString(R.string.nolist), Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.imgvw_machinelarning:
@@ -579,18 +577,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             case R.id.btnRefresh:
                 getData();
-                Toast.makeText(this, "Please wait.. refreshing..", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getResources().getString(R.string.pleasewait), Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.btnLanguage:
-                if (Lingver.getInstance().getLanguage().equals(Common.deafultLanguage)) {//==en
+                if (Lingver.getInstance().getLanguage().equals(Common.defaultLanguage)) {//==en
                     Lingver.getInstance().setLocale(this, Common.germanLanguage);
-                    Toast.makeText(this, "Language updated to german..", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, getResources().getString(R.string.languageupdate), Toast.LENGTH_SHORT).show();
                     sharedPrefUtils.saveLatestLanguage(Common.germanLanguage);
                 } else {
-                    Lingver.getInstance().setLocale(this, Common.deafultLanguage);
-                    sharedPrefUtils.saveLatestLanguage(Common.deafultLanguage);
-                    Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
+                    Lingver.getInstance().setLocale(this, Common.defaultLanguage);
+                    sharedPrefUtils.saveLatestLanguage(Common.defaultLanguage);
+                    Toast.makeText(this, getResources().getString(R.string.languageupdate), Toast.LENGTH_SHORT).show();
                 }
                 recreate();
              /*   if (LocaleHelper.getLanguage(this).equals("en")) {
@@ -603,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
             }*/
 
-            break;
+                break;
 
             default:
                 break;
