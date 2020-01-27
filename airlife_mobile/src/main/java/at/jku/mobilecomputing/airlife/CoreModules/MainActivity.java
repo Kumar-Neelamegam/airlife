@@ -53,6 +53,7 @@ import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Utilities.CustomDialog;
 import at.jku.mobilecomputing.airlife.Utilities.GPSUtils;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Widget.DataUpdateWidgetWorker;
@@ -109,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 checkGPSAndRequestLocation();
                 scheduleWidgetUpdater();
             } else {
-                Toast.makeText(MainActivity.this, getResources().getString(R.string.msg_nonetworkconnection), Toast.LENGTH_SHORT).show();
+                showInternetDialog(getResources().getString(R.string.msg_nonetworkconnection));
             }
 
         } catch (Exception e) {
@@ -153,18 +154,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void checkGPSAndRequestLocation() {
-      /*  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                checkLocationPermission();
-            } else {*/
+
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             //Call for AQI data based on location is done in "locationCallback"
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
         } else {
             new GPSUtils(this).turnGPSOn();
         }
-        //    }
-        //}
+
     }
 
     private void scheduleWidgetUpdater() {
@@ -253,47 +250,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    CustomDialog customDialog;
+
     private void showDialog(String s) {
-        RetrofitHelper.getInstance().showProgressDialog(this, s);
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        customDialog = new CustomDialog(this)
+                .setImage(R.drawable.ic_dataimport)
+                .setTitle("Information")
+                .setNegativeButtonVisible(View.GONE)
+                .setDescription(s)
+                .setPositiveButtonVisible(View.GONE);
+    }
+
+    private void showInternetDialog(String s) {
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        CustomDialog customDialog = new CustomDialog(this);
+        customDialog.setImage(R.drawable.ic_no_connection)
+                .setTitle("Information")
+                .setNegativeButtonVisible(View.VISIBLE)
+                .setNegativeButtonTitle("Ok")
+                .setDescription(s)
+                .setprogressBarVisible(View.GONE)
+                .setPositiveButtonVisible(View.GONE)
+                .setOnNegativeListener(new CustomDialog.negativeOnClick() {
+                    @Override
+                    public void onNegativePerformed() {
+                        customDialog.dismiss();
+                    }
+                });
     }
 
     private void dismissDialog() {
-        RetrofitHelper.getInstance().dismissProgressDialog();
-    }
+        // RetrofitHelper.getInstance().dismissProgressDialog();
+        if (customDialog != null)
+            customDialog.dismiss();
 
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.alert_title_location_access)
-                        .setMessage(R.string.alert_content_location_access)
-                        .setPositiveButton("Ok", (dialogInterface, i) -> {
-                            //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    MY_PERMISSIONS_REQUEST_LOCATION);
-                        })
-                        .setNegativeButton("Cancel", (dialogInterface, i) -> {
-                            //getAqiData();
-                        })
-                        .create()
-                        .show();
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
     }
 
     @Override
@@ -374,23 +365,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
                 // Your code here
                 //Toast.makeText(MainActivity.this, currentWeatherInfo.toString(), Toast.LENGTH_SHORT).show();
+                if (currentWeatherInfo != null) {
+                    //WAQI waqi = data.getWaqi();
+                    try {
+                        if (currentWeatherInfo.getCurrentTemperature() != null)
+                            sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                        if (currentWeatherInfo.getPressure() != null)
+                            pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
+                        if (currentWeatherInfo.getHumidity() != null)
+                            humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
+                        if (currentWeatherInfo.getWindSpeed() != null)
+                            windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
 
-                //WAQI waqi = data.getWaqi();
-                try {
-                    if (currentWeatherInfo.getCurrentTemperature() != null)
-                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
-                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
-                    if (currentWeatherInfo.getPressure() != null)
-                        pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
-                    if (currentWeatherInfo.getHumidity() != null)
-                        humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
-                    if (currentWeatherInfo.getWindSpeed() != null)
-                        windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
+                        Common.InserttoDB(MainActivity.this, data, lat, lng, apiFullResponse, currentWeatherInfo);
 
-                    Common.InserttoDB(MainActivity.this, data, lat, lng, apiFullResponse, currentWeatherInfo);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
@@ -398,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onFailure(String error) {
                 // Your code here
-                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+                Log.e("WeatherInfo-onFailure: ", error);
             }
         });
 
@@ -425,15 +417,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
                     Common.setAQIScaleGroup(data, circleBackground, this);
                     setWeatherInfo();
-                  /*  WAQI waqi = data.getWaqi();
-                    if (waqi.getTemperature() != null)
-                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                    if (waqi.getPressure() != null)
-                        pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                    if (waqi.getHumidity() != null)
-                        humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                    if (waqi.getWind() != null)
-                        windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));*/
                     locationTextView.setText(data.getCity().getName());
                     // setupAttributions(data);
                     addPollutantsToList(data.getWaqi());
@@ -483,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onFailure(String error) {
                 // Your code here
-                Log.e("updateCurrentWeatherInfo-onFailure: ", error);
+                Log.e("WeatherInfo-onFailure: ", error);
             }
         });
 
@@ -551,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btnRefresh:
-                getData();
+                recreate();
                 Toast.makeText(this, getResources().getString(R.string.pleasewait), Toast.LENGTH_SHORT).show();
                 break;
 
@@ -566,15 +549,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, getResources().getString(R.string.languageupdate), Toast.LENGTH_SHORT).show();
                 }
                 recreate();
-             /*   if (LocaleHelper.getLanguage(this).equals("en")) {
-                    Common.setLocale_new(this, "de");
-                    recreate();
-                    Toast.makeText(this, "Language updated to german..", Toast.LENGTH_SHORT).show();
-                }//else
-            {
-                Common.setLocale_new(this, "en");
-                Toast.makeText(this, "Language updated to english..", Toast.LENGTH_SHORT).show();
-            }*/
 
                 break;
 
@@ -591,7 +565,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        this.finishAffinity();
+
+        CustomDialog customDialog=new CustomDialog(this);
+        customDialog.setImage(R.drawable.ic_close_black_24dp)
+                .setTitle(getResources().getString(R.string.informationtitle))
+                .setNegativeButtonVisible(View.VISIBLE)
+                .setNegativeButtonTitle(getResources().getString(R.string.no))
+                .setPositiveButtonVisible(View.VISIBLE)
+                .setPossitiveButtonTitle(getString(R.string.yes))
+                .setDescription(getResources().getString(R.string.are_you_sure_want_to_exit))
+                .setprogressBarVisible(View.GONE)
+                .setOnPossitiveListener(new CustomDialog.possitiveOnClick() {
+                    @Override
+                    public void onPossitivePerformed() {
+                        finishAffinity();
+                        System.gc();
+                    }
+                })
+                .setOnNegativeListener(new CustomDialog.negativeOnClick() {
+                    @Override
+                    public void onNegativePerformed() {
+                        customDialog.dismiss();
+                    }
+                });
     }
 }

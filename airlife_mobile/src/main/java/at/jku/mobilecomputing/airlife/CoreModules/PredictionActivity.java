@@ -33,6 +33,7 @@ import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Database.AqiData.AqiDataSet;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.AsynkTaskCustom;
+import at.jku.mobilecomputing.airlife.Utilities.CustomDialog;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import at.jku.mobilecomputing.machinelearning.Prediction;
@@ -50,10 +51,14 @@ public class PredictionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prediction);
 
-        Init();
-        getAllDataSet();
-        lat = getIntent().getExtras().getDouble("latitude");
-        lng = getIntent().getExtras().getDouble("longitude");
+        try {
+            Init();
+            getAllDataSet();
+            lat = getIntent().getExtras().getDouble("latitude");
+            lng = getIntent().getExtras().getDouble("longitude");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -68,8 +73,6 @@ public class PredictionActivity extends AppCompatActivity {
         createModelARFF(aqiDataSets);
 
     }
-
-    AlertDialog alertDialog;
 
     /**
      * Create a training dataset from the local room database - step 1
@@ -147,7 +150,7 @@ public class PredictionActivity extends AppCompatActivity {
         try {
             //load progress
             //calling this method to show our android custom alert dialog
-            showCustomDialog("Prediction Inprogress", "Using machine learning to get the best results...");
+            showDialog("Prediction Inprogress", "Using machine learning to get the best results...");
             // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
             OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
 
@@ -155,34 +158,41 @@ public class PredictionActivity extends AppCompatActivity {
             retriever.updateDailyForecastInfo(lat, lng, new DailyForecastCallback() {
                 @Override
                 public void onReceiveDailyForecastInfoList(List<DailyForecastInfo> dailyForecastInfoList) {
-                    // Your code here
-                    // Toast.makeText(PredictionActivity.this, dailyForecastInfoList.toString(), Toast.LENGTH_SHORT).show();
-                    ArrayList<WeatherInfo> weatherInfo = new ArrayList<WeatherInfo>();
-                    WeatherInfo weatherInfo1 = new WeatherInfo();
 
-                    for (DailyForecastInfo dailyForecastInfo : dailyForecastInfoList) {
-                        String current_temp = getString(R.string.temperature_unit_celsius_2, Double.parseDouble(dailyForecastInfo.getDailyAverageTemperature()) - Common.KelvinToCelcius);
-                        String current_pressure = getString(R.string.pressure_unit_2, Double.parseDouble(dailyForecastInfo.getAveragePressure()));
-                        String current_humd = getString(R.string.humidity_unit_2, Double.parseDouble(dailyForecastInfo.getAverageHumidity()));
-                        String current_wind = getString(R.string.wind_unit_2, Double.parseDouble(dailyForecastInfo.getAverageWindSpeed()));
-                        weatherInfo1 = new WeatherInfo();
-                        weatherInfo1.setTemperature(current_temp);//temp
-                        weatherInfo1.setPressure(current_pressure);//pressure
-                        weatherInfo1.setHumidity(current_humd);//humidity
-                        weatherInfo1.setWind(current_wind);//windspeed
-                        weatherInfo1.setTimestamp(dailyForecastInfo.getDateCalendar().getTimeInMillis());
-                        //Getting entries
-                        weatherInfo.add(weatherInfo1);
+                    if(dailyForecastInfoList.size()>0){
+                        // Your code here
+                        // Toast.makeText(PredictionActivity.this, dailyForecastInfoList.toString(), Toast.LENGTH_SHORT).show();
+                        ArrayList<WeatherInfo> weatherInfo = new ArrayList<WeatherInfo>();
+                        WeatherInfo weatherInfo1 = new WeatherInfo();
+
+                        for (DailyForecastInfo dailyForecastInfo : dailyForecastInfoList) {
+                            String current_temp = getString(R.string.temperature_unit_celsius_2, Double.parseDouble(dailyForecastInfo.getDailyAverageTemperature()) - Common.KelvinToCelcius);
+                            String current_pressure = getString(R.string.pressure_unit_2, Double.parseDouble(dailyForecastInfo.getAveragePressure()));
+                            String current_humd = getString(R.string.humidity_unit_2, Double.parseDouble(dailyForecastInfo.getAverageHumidity()));
+                            String current_wind = getString(R.string.wind_unit_2, Double.parseDouble(dailyForecastInfo.getAverageWindSpeed()));
+                            weatherInfo1 = new WeatherInfo();
+                            weatherInfo1.setTemperature(current_temp);//temp
+                            weatherInfo1.setPressure(current_pressure);//pressure
+                            weatherInfo1.setHumidity(current_humd);//humidity
+                            weatherInfo1.setWind(current_wind);//windspeed
+                            weatherInfo1.setTimestamp(dailyForecastInfo.getDateCalendar().getTimeInMillis());
+                            //Getting entries
+                            weatherInfo.add(weatherInfo1);
+                        }
+                        Prediction prediction = new Prediction();
+                        resultList = prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, weatherInfo);
+                        prepareUiList(lat, lng, dailyForecastInfoList);
+                    }else
+                    {
+                        Toast.makeText(PredictionActivity.this, "No data found!", Toast.LENGTH_SHORT).show();
                     }
-                    Prediction prediction = new Prediction();
-                    resultList = prediction.loadTrainingSet(PredictionActivity.this, arffFile, lat, lng, weatherInfo);
-                    prepareUiList(lat, lng, dailyForecastInfoList);
+                   
                 }
 
                 @Override
                 public void onFailure(String error) {
                     // Your code here
-                    Log.e("updateDailyForecastInfo-onFailure: ", error);
+                    Log.e("Forecast-onFailure: ", error);
                 }
             });
 
@@ -239,43 +249,22 @@ public class PredictionActivity extends AppCompatActivity {
 
 
         //cancel progress
-        alertDialog.dismiss();
+        customDialog.dismiss();
         Toast.makeText(this, R.string.predictsuccess, Toast.LENGTH_SHORT).show();
 
     }
 
-    private void showCustomDialog(String titletxt, String messagetxt) {
-        //before inflating the custom alert dialog layout, we will get the current activity viewgroup
-        ViewGroup viewGroup = findViewById(android.R.id.content);
+    CustomDialog customDialog;
 
-        //then we will inflate the custom alert dialog xml that we created
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.my_dialog, viewGroup, false);
-
-        SpinKitView spinKitView = dialogView.findViewById(R.id.dgprogressBar);
-        Sprite animate = new CubeGrid();
-        spinKitView.setIndeterminateDrawable(animate);
-        TextView title, message;
-        ImageView logo;
-        title = dialogView.findViewById(R.id.dgtitle);
-        message = dialogView.findViewById(R.id.dgmessage);
-        logo = dialogView.findViewById(R.id.logo);
-
-        title.setText(titletxt);
-        message.setText(messagetxt);
-
-
-        //Now we need an AlertDialog.Builder object
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        //setting the view of the builder to our custom view that we already inflated
-        builder.setView(dialogView);
-
-
-        //finally creating the alert dialog and displaying it
-        alertDialog = builder.create();
-        alertDialog.show();
+    public void showDialog(String title, String info) {
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        customDialog = new CustomDialog(this)
+                .setImage(R.drawable.ic_deep_learning)
+                .setTitle(title)
+                .setNegativeButtonVisible(View.GONE)
+                .setDescription(info)
+                .setPositiveButtonVisible(View.GONE);
     }
-
 
     private String getclassName(int aqi) {
         String returnValue = "good";

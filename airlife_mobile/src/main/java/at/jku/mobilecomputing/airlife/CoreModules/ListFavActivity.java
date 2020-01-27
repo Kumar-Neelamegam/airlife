@@ -31,6 +31,7 @@ import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.NetworkUtils.APIResponse;
 import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Utilities.CustomDialog;
 import at.jku.mobilecomputing.airlife.Utilities.RecyclerItemTouchHelper;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import retrofit2.Call;
@@ -223,13 +224,21 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         });
 
     }
-
+    CustomDialog customDialog;
     private void showDialog(String s) {
-        RetrofitHelper.getInstance().showProgressDialog(this, s);
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        customDialog=new CustomDialog(this)
+                .setImage(R.drawable.ic_list)
+                .setTitle("Information")
+                .setNegativeButtonVisible(View.GONE)
+                .setDescription(s)
+                .setPositiveButtonVisible(View.GONE);
     }
 
     private void dismissDialog() {
-        RetrofitHelper.getInstance().dismissProgressDialog();
+        if(customDialog!=null)
+            customDialog.dismiss();
+        //RetrofitHelper.getInstance().dismissProgressDialog();
     }
 
 
