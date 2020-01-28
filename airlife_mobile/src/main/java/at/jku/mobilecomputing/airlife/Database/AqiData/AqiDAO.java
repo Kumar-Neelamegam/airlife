@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.RoomWarnings;
 import androidx.room.Update;
 
 import java.util.List;
@@ -16,6 +17,10 @@ public interface AqiDAO {
 
     @Query("SELECT * FROM `AqiDataSet` ORDER BY `id` DESC")
     List<AqiDataSet> getAllAqiData();
+
+    @SuppressWarnings({RoomWarnings.CURSOR_MISMATCH})
+    @Query("SELECT DISTINCT  airquality , id FROM `AqiDataSet` ORDER BY `id` DESC limit 7")
+    List<AqiDataSet> getAllAqiTopData();
 
     @Query("SELECT * FROM `AqiDataSet` WHERE `id` =:id")
     AqiDataSet getAqiData(int id);

@@ -44,6 +44,14 @@
                 android:value=".CoreModules.MainActivity"/>
         </activity>
 
+        <activity
+            android:name=".CoreModules.MoreDetailedActivity"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".CoreModules.MainActivity" />
+        </activity>
+
         <receiver android:name=".Widget.ALWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

@@ -29,6 +29,7 @@ public class SplashActivity extends CoreActivity {
     SpinKitView spinKitView;
     SharedPrefUtils sharedPrefUtils;
 
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,11 +47,12 @@ public class SplashActivity extends CoreActivity {
 
     }
 
+    //**********************************************************************************************
     @Override
     public void onPermissionsGranted(int requestCode) {
 
         try {
-            
+
             Lingver.init(getApplication(), Common.defaultLanguage);
 
             sharedPrefUtils = SharedPrefUtils.getInstance(this);
@@ -69,6 +71,7 @@ public class SplashActivity extends CoreActivity {
 
     }
 
+    //**********************************************************************************************
     private void getInit() {
 
         spinKitView = findViewById(R.id.progressBar);
@@ -87,6 +90,7 @@ public class SplashActivity extends CoreActivity {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void onResume() {
         super.onResume();
@@ -97,6 +101,7 @@ public class SplashActivity extends CoreActivity {
         finishAffinity();
     }
 
+    //**********************************************************************************************
     private void doBounceAnimation(View targetView) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, 100, 0);
         animator.setInterpolator(new BounceInterpolator());
@@ -105,33 +110,41 @@ public class SplashActivity extends CoreActivity {
         animator.start();
     }
 
+    //**********************************************************************************************
     @Override
     public void onBackPressed() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void bindViews() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void setListeners() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void onPause() {
         super.onPause();
     }
 
+    //**********************************************************************************************
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
+    //**********************************************************************************************
     @Override
     protected void onStop() {
         super.onStop();
     }
+
+    //**********************************************************************************************
 }

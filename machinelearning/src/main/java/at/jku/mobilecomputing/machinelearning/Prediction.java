@@ -1,9 +1,7 @@
 package at.jku.mobilecomputing.machinelearning;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +37,7 @@ public class Prediction {
     String ModelPath = "";
     List resultList = new ArrayList();
 
+    //**********************************************************************************************
     public List loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng, ArrayList<WeatherInfo> weatherInfo) {
 
 
@@ -135,6 +134,7 @@ public class Prediction {
         }
     }
 
+    //**********************************************************************************************
     //5. classification using the generated model
     public List modelClassifier(Classifier classifier_result, ArrayList<WeatherInfo> weatherInfo) {
         try {
@@ -191,8 +191,7 @@ public class Prediction {
                 for (int i = 0; i < dataRaw.size(); i++) {
                     cls = classifier_result;
                     String result = (String) classVal.get((int) cls.classifyInstance(dataRaw.instance(i)));
-                    Log.e("Final prediction result: ", result);
-                    //Toast.makeText(context, "results:" + result, Toast.LENGTH_SHORT).show();
+                    Log.e("prediction result: ", result);
                     resultList.add(result);
                 }
 
@@ -207,6 +206,7 @@ public class Prediction {
         return resultList;
     }
 
+    //**********************************************************************************************
     private double getTomorrowTimeStamp(String time) throws ParseException {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm");
@@ -218,6 +218,7 @@ public class Prediction {
         System.out.println("Given Time in milliseconds : " + calendar.getTimeInMillis());
         return calendar.getTimeInMillis();
     }
+    //**********************************************************************************************
 
     public String tomorrowDate() {
         Date todayDate = new Date();

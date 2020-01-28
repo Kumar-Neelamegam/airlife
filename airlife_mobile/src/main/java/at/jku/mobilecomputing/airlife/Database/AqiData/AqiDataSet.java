@@ -12,6 +12,7 @@ import at.jku.mobilecomputing.airlife.Database.TimestampConverter;
 
 @Entity
 public class AqiDataSet {
+
     @PrimaryKey(autoGenerate = true)
     private int id;
 

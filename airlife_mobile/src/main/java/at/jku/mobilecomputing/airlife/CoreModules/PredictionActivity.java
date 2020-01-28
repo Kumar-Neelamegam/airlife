@@ -1,13 +1,11 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
-import android.app.AlertDialog;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,14 +13,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
-import androidx.core.widget.ImageViewCompat;
 
 import com.ftoslab.openweatherretrieverz.DailyForecastCallback;
 import com.ftoslab.openweatherretrieverz.DailyForecastInfo;
 import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
-import com.github.ybq.android.spinkit.SpinKitView;
-import com.github.ybq.android.spinkit.sprite.Sprite;
-import com.github.ybq.android.spinkit.style.CubeGrid;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -41,7 +35,6 @@ import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import at.jku.mobilecomputing.machinelearning.Prediction;
 import at.jku.mobilecomputing.machinelearning.WeatherInfo;
-
 /**
  * Muthukumar Neelamegam
  * Mobile Computing Project - JKU, Linz
@@ -55,6 +48,10 @@ public class PredictionActivity extends AppCompatActivity {
     double lng;
     List resultList;
 
+    //**********************************************************************************************
+    CustomDialog customDialog;
+
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,18 +68,7 @@ public class PredictionActivity extends AppCompatActivity {
 
     }
 
-    private void callMachineLearning(List<AqiDataSet> aqiDataSets) {
-
-        // show samples
-        StringBuilder sb = new StringBuilder("Samples:\n");
-        for (AqiDataSet aqiDataSet : aqiDataSets) {
-            sb.append(aqiDataSet.getAirquality() + "\n");
-        }
-
-        createModelARFF(aqiDataSets);
-
-    }
-
+    //**********************************************************************************************
     /**
      * Create a training dataset from the local room database - step 1
      * ARFF (Attribute-Relation File Format)
@@ -214,6 +200,20 @@ public class PredictionActivity extends AppCompatActivity {
 
     }
 
+    //**********************************************************************************************
+    private void callMachineLearning(List<AqiDataSet> aqiDataSets) {
+
+        // show samples
+        StringBuilder sb = new StringBuilder("Samples:\n");
+        for (AqiDataSet aqiDataSet : aqiDataSets) {
+            sb.append(aqiDataSet.getAirquality() + "\n");
+        }
+
+        createModelARFF(aqiDataSets);
+
+    }
+
+    //**********************************************************************************************
     private void prepareUiList(double lat, double lng, List<DailyForecastInfo> dailyForecastInfoList) {
 
         // Parent layout
@@ -227,8 +227,12 @@ public class PredictionActivity extends AppCompatActivity {
 
         for (int i = 0; i < dailyForecastInfoList.size(); i++) {
             // Add the text layout to the parent layout
-            view = layoutInflater.inflate(R.layout.row_item_predict, parentLayout, false);
-            // fill in any details dynamically here
+            if (i == 0) {
+                view = layoutInflater.inflate(R.layout.row_item_predict_first, parentLayout, false);
+            } else {
+                view = layoutInflater.inflate(R.layout.row_item_predict, parentLayout, false);
+            }
+
             TextView txtvwSno = view.findViewById(R.id.txtvw_sno);
             TextView txtvwDay = view.findViewById(R.id.txtvw_day);
             TextView txtvwDateinfo = view.findViewById(R.id.txtvw_dateinfo);
@@ -242,9 +246,13 @@ public class PredictionActivity extends AppCompatActivity {
             ImageView imgvwAirqualityscale = view.findViewById(R.id.imgvw_airqualityscale);
             // Add the text view to the parent layout
             txtvwSno.setText(String.valueOf(sno + 1));
-            txtvwDay.setText(days[i]);
+
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
             String dateString = formatter.format(new Date(dailyForecastInfoList.get(i).getDateCalendar().getTimeInMillis()));
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(dailyForecastInfoList.get(i).getDateCalendar().getTime());
+            SimpleDateFormat simpleDateformat = new SimpleDateFormat("EEEE"); // the day of the week spelled out completely
+            txtvwDay.setText(simpleDateformat.format(dailyForecastInfoList.get(i).getDateCalendar().getTime()));
             txtvwDateinfo.setText( "  "+dateString);
             txtvwLocationinfo.setText(Common.getCompleteAddressString(this, lat, lng));
             predictTemp.setText(dailyForecastInfoList.get(i).getDailyAverageTemperature());
@@ -266,8 +274,9 @@ public class PredictionActivity extends AppCompatActivity {
 
     }
 
+    //**********************************************************************************************
     private void getresults(String mlResult, ImageView imageViewCompat) {
-       // good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous
+        // good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous
 
         if (mlResult.equals("good")) {
             imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_good));
@@ -288,8 +297,6 @@ public class PredictionActivity extends AppCompatActivity {
 
     }
 
-    CustomDialog customDialog;
-
     public void showDialog(String title, String info) {
         //RetrofitHelper.getInstance().showProgressDialog(this, s);
         customDialog = new CustomDialog(this)
@@ -300,6 +307,7 @@ public class PredictionActivity extends AppCompatActivity {
                 .setPositiveButtonVisible(View.GONE);
     }
 
+    //**********************************************************************************************
     private String getclassName(int aqi) {
         String returnValue = "good";
         if (aqi >= 0 && aqi <= 50) {
@@ -318,6 +326,7 @@ public class PredictionActivity extends AppCompatActivity {
         return returnValue;
     }
 
+    //**********************************************************************************************
 
     private void getAllDataSet() {
         AsynkTaskCustom asynkTaskCustom = new AsynkTaskCustom(PredictionActivity.this, "Please wait...Loading...");
@@ -338,6 +347,7 @@ public class PredictionActivity extends AppCompatActivity {
         });
     }
 
+    //**********************************************************************************************
     private void Init() {
         setUPTheme();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -345,6 +355,7 @@ public class PredictionActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(getResources().getString(R.string.predictionTitle));
     }
 
+    //**********************************************************************************************
     public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
         if (sharedPrefUtils.isDarkMode()) {
@@ -357,6 +368,7 @@ public class PredictionActivity extends AppCompatActivity {
 
     }
 
+    //**********************************************************************************************
 
     @Override
     public void onBackPressed() {
@@ -364,6 +376,7 @@ public class PredictionActivity extends AppCompatActivity {
         this.finish();
     }
 
+    //**********************************************************************************************
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -375,4 +388,5 @@ public class PredictionActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    //**********************************************************************************************
 }

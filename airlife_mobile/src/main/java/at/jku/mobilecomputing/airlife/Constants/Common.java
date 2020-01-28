@@ -189,6 +189,14 @@ public class Common {
         return allPojos!=null? allPojos : new ArrayList<>();//return null or empty
     }
 
+
+    public static List<AqiDataSet> getAllAQITopDataset(Context ctx) {
+        AqiDAO dao = AirLifeDatabaseClient.getInstance(ctx).getAppDatabase().aqiDAO();
+        List<AqiDataSet> allPojos = dao.getAllAqiTopData();
+        return allPojos != null ? allPojos : new ArrayList<>();//return null or empty
+    }
+
+
     /**
      * Insert favourite place
      * @param ctx
@@ -367,7 +375,7 @@ public class Common {
             List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
             if (addresses != null) {
                 Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder("");
+                StringBuilder strReturnedAddress = new StringBuilder();
 
                 for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");

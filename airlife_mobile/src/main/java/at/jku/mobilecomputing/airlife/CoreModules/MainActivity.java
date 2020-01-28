@@ -15,10 +15,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -51,7 +49,6 @@ import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
-import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.CustomDialog;
 import at.jku.mobilecomputing.airlife.Utilities.GPSUtils;
@@ -99,12 +96,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     AppCompatImageView predictMachineLearning;
     AppCompatImageView btnRefresh;
     AppCompatImageView btnLanguage;
+    AppCompatImageView btnStat;
 
     double currentLatitude = 0;
     double currentLongitude = 0;
 
     String apiFullResponse;
+    //**********************************************************************************************
+    CustomDialog customDialog;
 
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
+    //**********************************************************************************************
     public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
         if (sharedPrefUtils.getAppInstallTime() == 0)
@@ -134,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else setTheme(R.style.AppTheme_Light);
     }
 
+    //**********************************************************************************************
     private void getData() {
         aqiViewModel = ViewModelProviders.of(this).get(AqiViewModel.class);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -160,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         };
     }
 
+    //**********************************************************************************************
     private void checkGPSAndRequestLocation() {
 
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -171,6 +174,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //**********************************************************************************************
+
+    //**********************************************************************************************
     private void scheduleWidgetUpdater() {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -185,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         WorkManager.getInstance().enqueue(periodicWorkRequest);
     }
 
+    //**********************************************************************************************
+
     /**
      * Initiate widgets
      */
@@ -198,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         attributionTextView = findViewById(R.id.attribution_text_view);
         circleBackground = findViewById(R.id.aqi_background);
         btnLanguage = findViewById(R.id.btnLanguage);
+        btnStat = findViewById(R.id.btnstats);
         makeFavourite = findViewById(R.id.imgvw_favourite);
         listFavourite = findViewById(R.id.imgvw_favlist);
         predictMachineLearning = findViewById(R.id.imgvw_machinelarning);
@@ -218,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.scaleVeryUnhealthy).setOnClickListener(this);
         findViewById(R.id.scaleHazardous).setOnClickListener(this);
         findViewById(R.id.btnDarkMode).setOnClickListener(this);
+        findViewById(R.id.btnstats).setOnClickListener(this);
 
         findViewById(R.id.imgvw_favourite).setOnClickListener(this);
         findViewById(R.id.imgvw_favlist).setOnClickListener(this);
@@ -227,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //**********************************************************************************************
     private void setupRecyclerView() {
         pollutantsRecyclerView = findViewById(R.id.pollutants_recycler_view);
         pollutantsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -235,6 +246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         pollutantsRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
+    //**********************************************************************************************
     private void addPollutantsToList(WAQI waqi) {
         try {
             pollutantsList.clear();
@@ -257,8 +269,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    CustomDialog customDialog;
-
     private void showDialog(String s) {
         //RetrofitHelper.getInstance().showProgressDialog(this, s);
         customDialog = new CustomDialog(this)
@@ -269,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setPositiveButtonVisible(View.GONE);
     }
 
+    //**********************************************************************************************
     private void showInternetDialog(String s) {
         //RetrofitHelper.getInstance().showProgressDialog(this, s);
         CustomDialog customDialog = new CustomDialog(this);
@@ -287,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
+    //**********************************************************************************************
     private void dismissDialog() {
         // RetrofitHelper.getInstance().dismissProgressDialog();
         if (customDialog != null)
@@ -294,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //**********************************************************************************************
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -316,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
+    //**********************************************************************************************
     /**
      * Get air quality data by passing latitude and longitude
      *
@@ -360,6 +373,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //**********************************************************************************************
     private void setWeatherInfo(String lat, String lng) {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
@@ -403,6 +417,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //**********************************************************************************************
     /**
      * Get air quality data by using network ip
      */
@@ -437,6 +452,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    //**********************************************************************************************
     private void setWeatherInfo() {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
@@ -481,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    //**********************************************************************************************
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -493,6 +510,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //**********************************************************************************************
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -531,6 +549,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, getResources().getString(R.string.nolist), Toast.LENGTH_SHORT).show();
                 }
                 break;
+
+            case R.id.btnstats:
+                count = Common.getFavouriteListCount(MainActivity.this);
+                if (count > 0) {
+                    startActivity(new Intent(this, MoreDetailedActivity.class));
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.nolist), Toast.LENGTH_SHORT).show();
+                }
+                break;
             case R.id.imgvw_machinelarning:
                 Intent mIntent = new Intent(this, PredictionActivity.class);
                 Bundle extras = new Bundle();
@@ -564,12 +591,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //**********************************************************************************************
     @Override
     protected void onStop() {
         super.onStop();
         System.gc();
     }
 
+    //**********************************************************************************************
     @Override
     public void onBackPressed() {
 
@@ -596,4 +625,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
     }
-}
+
+    //**********************************************************************************************
+}//END

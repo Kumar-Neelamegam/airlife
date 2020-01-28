@@ -54,6 +54,10 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     private final String apiKey = BuildConfig.ApiKey;
     List<FavouriteListDataSet> result = new ArrayList<>();
 
+    //**********************************************************************************************
+    CustomDialog customDialog;
+
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +72,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
+    //**********************************************************************************************
     private void LoadData(List<FavouriteListDataSet> result) {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -86,6 +91,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
+    //**********************************************************************************************
     private void generateList() {
 
         List<FavouriteListDataSet> favouriteListObjects = new ArrayList<>();
@@ -98,6 +104,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
+    //**********************************************************************************************
     private void Init() {
         setUPTheme();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -108,6 +115,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
+    //**********************************************************************************************
     public void setUPTheme() {
         sharedPrefUtils = SharedPrefUtils.getInstance(this);
         if (sharedPrefUtils.isDarkMode()) {
@@ -120,12 +128,14 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
 
     }
 
+    //**********************************************************************************************
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         this.finish();
     }
 
+    //**********************************************************************************************
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -137,17 +147,20 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         return super.onOptionsItemSelected(item);
     }
 
+    //**********************************************************************************************
     @Override
     public void onClick(View v) {
 
     }
 
+    //**********************************************************************************************
     @Override
     public void onItemClick(View view, int position) {
         //Toast.makeText(this, "clicked on:"+ position, Toast.LENGTH_SHORT).show();
 
     }
 
+    //**********************************************************************************************
     private void getAqiDataFromLatitudeLongitude(int id, double latitude, double longitude, String location, int totalSize) {
         try {
 
@@ -195,6 +208,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         }
     }
 
+    //**********************************************************************************************
     private void setWeatherInfo(FavouriteListDataSet favouriteListDataSet, int totalSize, double latitude, double longitude) {
 
         // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
@@ -230,7 +244,6 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         });
 
     }
-    CustomDialog customDialog;
     private void showDialog(String s) {
         //RetrofitHelper.getInstance().showProgressDialog(this, s);
         customDialog=new CustomDialog(this)
@@ -241,6 +254,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
                 .setPositiveButtonVisible(View.GONE);
     }
 
+    //**********************************************************************************************
     private void dismissDialog() {
         if(customDialog!=null)
             customDialog.dismiss();
@@ -248,6 +262,7 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
     }
 
 
+    //**********************************************************************************************
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
 
@@ -271,4 +286,5 @@ public class ListFavActivity extends AppCompatActivity implements FavouriteListA
         }
 
     }
+    //**********************************************************************************************
 }

@@ -66,6 +66,7 @@
     <string name="languageupdate">Language updated to german</string>
     <string name="loading">Loading Information..Please wait..</string>
     <string name="favTitle">Air Life - Favourite List</string>
+    <string name="moreinfoTitle">Air Life - More Details</string>
     <string name="predictionTitle">Air Life - Prediction</string>
     <string name="predictsuccess">Predicted Successfully...</string>
 
