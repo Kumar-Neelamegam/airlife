@@ -10,6 +10,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -39,6 +41,12 @@ import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class Common {
 
     public static String openWeatherKey = "df21ec7ffa6b60adcee1e9f722b1e46d";
@@ -351,6 +359,30 @@ public class Common {
         ctx.sendBroadcast(intent);
     }
 
+
+    public static String getCompleteAddressString(Context ctx, double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(ctx, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+                Log.w("My Current loction address", strReturnedAddress.toString());
+            } else {
+                Log.w("My Current loction address", "No Address returned!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.w("My Current loction address", "Canont get Address!");
+        }
+        return strAdd;
+    }
 
 
 }

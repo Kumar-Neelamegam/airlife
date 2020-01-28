@@ -66,6 +66,13 @@ import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.UNHEALTHY
 import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.VERY_UNHEALTHY;
 import static at.jku.mobilecomputing.airlife.Utilities.GPSUtils.GPS_REQUEST;
 
+
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Views
     private TextView aqiTextView, temperatureTextView, locationTextView, pressureTextView, humidityTextView, windTextView, attributionTextView;

@@ -17,6 +17,12 @@ import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class SplashActivity extends CoreActivity {
 
     private static final long SPLASH_DURATION = 3000;

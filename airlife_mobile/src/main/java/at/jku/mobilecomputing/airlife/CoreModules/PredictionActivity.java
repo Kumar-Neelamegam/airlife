@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
+import androidx.core.widget.ImageViewCompat;
 
 import com.ftoslab.openweatherretrieverz.DailyForecastCallback;
 import com.ftoslab.openweatherretrieverz.DailyForecastInfo;
@@ -25,8 +26,10 @@ import com.github.ybq.android.spinkit.style.CubeGrid;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import at.jku.mobilecomputing.airlife.Constants.Common;
@@ -39,6 +42,12 @@ import at.jku.mobilecomputing.airlife.Utilities.onWriteCode;
 import at.jku.mobilecomputing.machinelearning.Prediction;
 import at.jku.mobilecomputing.machinelearning.WeatherInfo;
 
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class PredictionActivity extends AppCompatActivity {
 
     private SharedPrefUtils sharedPrefUtils;
@@ -234,14 +243,17 @@ public class PredictionActivity extends AppCompatActivity {
             // Add the text view to the parent layout
             txtvwSno.setText(String.valueOf(sno + 1));
             txtvwDay.setText(days[i]);
-            Calendar calendar = dailyForecastInfoList.get(i).getDateCalendar();
-            txtvwDateinfo.setText(calendar.getTime().toGMTString());
-            txtvwLocationinfo.setText("");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+            String dateString = formatter.format(new Date(dailyForecastInfoList.get(i).getDateCalendar().getTimeInMillis()));
+            txtvwDateinfo.setText( "  "+dateString);
+            txtvwLocationinfo.setText(Common.getCompleteAddressString(this, lat, lng));
             predictTemp.setText(dailyForecastInfoList.get(i).getDailyAverageTemperature());
             predictPressure.setText(dailyForecastInfoList.get(i).getAveragePressure());
             predictHumid.setText(dailyForecastInfoList.get(i).getAverageHumidity());
             predictWind.setText(dailyForecastInfoList.get(i).getAverageWindSpeed());
-            txtairquality.setText(resultList.get(i).toString());
+            String result=resultList.get(i).toString();
+            getresults(result, imgvwAirqualityscale);
+            txtairquality.setText(result);
 
             parentLayout.addView(view);
             sno++;
@@ -251,6 +263,28 @@ public class PredictionActivity extends AppCompatActivity {
         //cancel progress
         customDialog.dismiss();
         Toast.makeText(this, R.string.predictsuccess, Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void getresults(String mlResult, ImageView imageViewCompat) {
+       // good,moderate,unhealthysensitive,unhealthy,veryunhealthy,hazardous
+
+        if (mlResult.equals("good")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_good));
+        } else if (mlResult.equals("moderate")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_moderate));
+        } else if (mlResult.equals("unhealthysensitive")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_sensitive_unhealthy));
+        } else if (mlResult.equals("unhealthy")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_unhealthy));
+        } else if (mlResult.equals("veryunhealthy")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_very_unhealthy));
+        } else if (mlResult.equals("hazardous")) {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_hazardous));
+        } else {
+            imageViewCompat.setBackground(getResources().getDrawable(R.drawable.ic_smile_good));
+        }
+
 
     }
 

@@ -5,8 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.shashank.sony.fancygifdialoglib.FancyGifDialog;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -27,13 +25,18 @@ import weka.core.converters.ArffLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class Prediction {
 
 
     Context context;
     double currentLatitude, currentLongitude;
     String ModelPath = "";
-    FancyGifDialog fancyGifDialog;
     List resultList = new ArrayList();
 
     public List loadTrainingSet(Context ctx, InputStream arffFile, double lat, double lng, ArrayList<WeatherInfo> weatherInfo) {
@@ -84,15 +87,6 @@ public class Prediction {
     }
 
 
-    public void callDialog(String title, String message, int drw) {
-        fancyGifDialog = new FancyGifDialog.Builder((Activity) context)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveBtnBackground("#FF4081")
-                .setGifResource(drw)   //Pass your Gif here
-                .isCancellable(true)
-                .build();
-    }
 
     //**************************************************************************************************
     //2. Building classifier for training set
@@ -198,7 +192,7 @@ public class Prediction {
                     cls = classifier_result;
                     String result = (String) classVal.get((int) cls.classifyInstance(dataRaw.instance(i)));
                     Log.e("Final prediction result: ", result);
-                    Toast.makeText(context, "results:" + result, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "results:" + result, Toast.LENGTH_SHORT).show();
                     resultList.add(result);
                 }
 

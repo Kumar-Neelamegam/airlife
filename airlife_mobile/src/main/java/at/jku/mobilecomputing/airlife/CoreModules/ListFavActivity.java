@@ -38,6 +38,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class ListFavActivity extends AppCompatActivity implements FavouriteListAdapter.ItemClickListener, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener, View.OnClickListener {
 
     private SharedPrefUtils sharedPrefUtils;
