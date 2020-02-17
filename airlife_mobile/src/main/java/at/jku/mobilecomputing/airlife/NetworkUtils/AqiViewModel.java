@@ -94,6 +94,7 @@ public class AqiViewModel extends ViewModel {
         });
     }
 
+
     public LiveData<Status> getStatus() {
         return mStatus;
     }

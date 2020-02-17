@@ -1,2 +1,2 @@
-include ':airlife_mobile', ':airlife_wear'
+include ':airlife_mobile', ':airlife_wear', ':machinelearning'
 rootProject.name='Air Life'

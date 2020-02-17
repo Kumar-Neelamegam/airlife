@@ -15,7 +15,7 @@ import at.jku.mobilecomputing.airlife.DomainObjects.properties.So2;
 import at.jku.mobilecomputing.airlife.DomainObjects.properties.Temperature;
 import at.jku.mobilecomputing.airlife.DomainObjects.properties.Wind;
 
-public class WAQI {
+public class WAQI  {
 
     @SerializedName("co")
     @Expose

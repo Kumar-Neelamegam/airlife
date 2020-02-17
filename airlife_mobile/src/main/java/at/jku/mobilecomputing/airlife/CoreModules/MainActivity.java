@@ -2,28 +2,21 @@ package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.Manifest;
 import android.app.Activity;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -34,11 +27,15 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.ftoslab.openweatherretrieverz.CurrentWeatherInfo;
+import com.ftoslab.openweatherretrieverz.OpenWeatherRetrieverZ;
+import com.ftoslab.openweatherretrieverz.WeatherCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.yariksoffice.lingver.Lingver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,26 +45,36 @@ import at.jku.mobilecomputing.airlife.Adapters.PollutantsAdapter;
 import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.Constants.Status;
 import at.jku.mobilecomputing.airlife.CustomDialog.InfoDialog;
-import at.jku.mobilecomputing.airlife.DomainObjects.Attribution;
 import at.jku.mobilecomputing.airlife.DomainObjects.Data;
 import at.jku.mobilecomputing.airlife.DomainObjects.Pollutant;
 import at.jku.mobilecomputing.airlife.DomainObjects.WAQI;
 import at.jku.mobilecomputing.airlife.NetworkUtils.AqiViewModel;
-import at.jku.mobilecomputing.airlife.NetworkUtils.RetrofitHelper;
 import at.jku.mobilecomputing.airlife.R;
+import at.jku.mobilecomputing.airlife.Utilities.CustomDialog;
 import at.jku.mobilecomputing.airlife.Utilities.GPSUtils;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
-import at.jku.mobilecomputing.airlife.Widget.ALWidget;
 import at.jku.mobilecomputing.airlife.Widget.DataUpdateWidgetWorker;
 
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.GOOD;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.HAZARDOUS;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.MODERATE;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.UNHEALTHY;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.UNHEALTHY_FOR_SENSITIVE;
+import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.VERY_UNHEALTHY;
 import static at.jku.mobilecomputing.airlife.Utilities.GPSUtils.GPS_REQUEST;
-import static at.jku.mobilecomputing.airlife.Constants.PollutionLevels.*;
 
+
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //Views
     private TextView aqiTextView, temperatureTextView, locationTextView, pressureTextView, humidityTextView, windTextView, attributionTextView;
     private RecyclerView pollutantsRecyclerView;
-    private ViewGroup rateUsCard;
+
 
     //Data
     private AqiViewModel aqiViewModel;
@@ -84,30 +91,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LocationCallback locationCallback;
     private Location latestLocation;
     AppCompatImageView circleBackground;
+    AppCompatImageView makeFavourite;
+    AppCompatImageView listFavourite;
+    AppCompatImageView predictMachineLearning;
+    AppCompatImageView btnRefresh;
+    AppCompatImageView btnLanguage;
+    AppCompatImageView btnStat;
 
+    double currentLatitude = 0;
+    double currentLongitude = 0;
+
+    String apiFullResponse;
+    //**********************************************************************************************
+    CustomDialog customDialog;
+
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            sharedPrefUtils = SharedPrefUtils.getInstance(this);
-            Common.setUpTheme(sharedPrefUtils, getApplicationContext());
+            setUPTheme();
             setContentView(R.layout.activity_main);
             init();
-            getData();
-            checkGPSAndRequestLocation();
-            scheduleWidgetUpdater();
+            if (Common.getNetworkStatus(this)) {
+                getData();
+                checkGPSAndRequestLocation();
+                scheduleWidgetUpdater();
+            } else {
+                showInternetDialog(getResources().getString(R.string.msg_nonetworkconnection));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    //**********************************************************************************************
+    public void setUPTheme() {
+        sharedPrefUtils = SharedPrefUtils.getInstance(this);
+        if (sharedPrefUtils.getAppInstallTime() == 0)
+            sharedPrefUtils.setAppInstallTime(System.currentTimeMillis());
+        if (sharedPrefUtils.isDarkMode()) setTheme(R.style.AppTheme_Dark);
+        else setTheme(R.style.AppTheme_Light);
+    }
+
+    //**********************************************************************************************
     private void getData() {
         aqiViewModel = ViewModelProviders.of(this).get(AqiViewModel.class);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(20 * 1000);
+        //locationRequest.setInterval(50 * 1000);
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -118,27 +153,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (location != null) {
                         latestLocation = location;
                         getAqiDataFromLatitudeLongitude(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()));
+                        currentLatitude = location.getLatitude();
+                        currentLongitude = location.getLongitude();
+                        Log.e("onLocationResult: ", currentLatitude + "=" + currentLongitude);
                     }
                 }
             }
         };
     }
 
+    //**********************************************************************************************
     private void checkGPSAndRequestLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                checkLocationPermission();
-            } else {
-                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    //Call for AQI data based on location is done in "locationCallback"
-                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-                } else {
-                    new GPSUtils(this).turnGPSOn();
-                }
-            }
+
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            //Call for AQI data based on location is done in "locationCallback"
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        } else {
+            new GPSUtils(this).turnGPSOn();
         }
+
     }
 
+    //**********************************************************************************************
+
+    //**********************************************************************************************
     private void scheduleWidgetUpdater() {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -153,6 +191,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         WorkManager.getInstance().enqueue(periodicWorkRequest);
     }
 
+    //**********************************************************************************************
+
+    /**
+     * Initiate widgets
+     */
     private void init() {
         aqiTextView = findViewById(R.id.aqi_text_view);
         temperatureTextView = findViewById(R.id.temperature_text_view);
@@ -161,11 +204,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         humidityTextView = findViewById(R.id.humidity_text_view);
         windTextView = findViewById(R.id.wind_text_view);
         attributionTextView = findViewById(R.id.attribution_text_view);
-        circleBackground=findViewById(R.id.aqi_background);
+        circleBackground = findViewById(R.id.aqi_background);
+        btnLanguage = findViewById(R.id.btnLanguage);
+        btnStat = findViewById(R.id.btnstats);
+        makeFavourite = findViewById(R.id.imgvw_favourite);
+        listFavourite = findViewById(R.id.imgvw_favlist);
+        predictMachineLearning = findViewById(R.id.imgvw_machinelarning);
+        btnRefresh = findViewById(R.id.btnRefresh);
+
         setupRecyclerView();
         setupClickListeners();
     }
 
+    /**
+     * Setup widgets control listeners
+     */
     private void setupClickListeners() {
         findViewById(R.id.scaleGood).setOnClickListener(this);
         findViewById(R.id.scaleModerate).setOnClickListener(this);
@@ -174,16 +227,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.scaleVeryUnhealthy).setOnClickListener(this);
         findViewById(R.id.scaleHazardous).setOnClickListener(this);
         findViewById(R.id.btnDarkMode).setOnClickListener(this);
+        findViewById(R.id.btnstats).setOnClickListener(this);
+
+        findViewById(R.id.imgvw_favourite).setOnClickListener(this);
+        findViewById(R.id.imgvw_favlist).setOnClickListener(this);
+        findViewById(R.id.imgvw_machinelarning).setOnClickListener(this);
+        findViewById(R.id.btnRefresh).setOnClickListener(this);
+        btnLanguage.setOnClickListener(this);
+
     }
 
+    //**********************************************************************************************
     private void setupRecyclerView() {
         pollutantsRecyclerView = findViewById(R.id.pollutants_recycler_view);
         pollutantsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         pollutantsRecyclerView.setHasFixedSize(true);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(),DividerItemDecoration.VERTICAL);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(pollutantsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         pollutantsRecyclerView.addItemDecoration(dividerItemDecoration);
     }
 
+    //**********************************************************************************************
     private void addPollutantsToList(WAQI waqi) {
         try {
             pollutantsList.clear();
@@ -206,81 +269,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void setAqiScaleGroup() {
-        int aqi = data.getAqi();
-        ImageView aqiScaleText;
-        if (aqi >= 0 && aqi <= 50) {
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setImageResource(R.drawable.circle_good);
-        }
-        else if (aqi >= 51 && aqi <= 100){
-            aqiScaleText = findViewById(R.id.scaleModerate);
-            circleBackground.setImageResource(R.drawable.circle_moderate);
-        } else if (aqi >= 101 && aqi <= 150){
-            aqiScaleText = findViewById(R.id.scaleUnhealthySensitive);
-            circleBackground.setImageResource(R.drawable.circle_unhealthysg);
-        } else if (aqi >= 151 && aqi <= 200){
-            aqiScaleText = findViewById(R.id.scaleUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_unhealthy);
-        } else if (aqi >= 201 && aqi <= 300){
-            aqiScaleText = findViewById(R.id.scaleVeryUnhealthy);
-            circleBackground.setImageResource(R.drawable.circle_veryunhealthy);
-        } else if (aqi >= 301){
-            aqiScaleText = findViewById(R.id.scaleHazardous);
-            circleBackground.setImageResource(R.drawable.circle_harzardous);
-        } else{
-            aqiScaleText = findViewById(R.id.scaleGood);
-            circleBackground.setBackgroundResource(R.drawable.circle_good);
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            aqiScaleText.setForeground(getDrawable(R.drawable.selected_aqi_foreground));
-        }
-
-    }
-
     private void showDialog(String s) {
-        RetrofitHelper.getInstance().showProgressDialog(this, s);
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        customDialog = new CustomDialog(this)
+                .setImage(R.drawable.ic_dataimport)
+                .setTitle("Information")
+                .setNegativeButtonVisible(View.GONE)
+                .setDescription(s)
+                .setPositiveButtonVisible(View.GONE);
     }
 
+    //**********************************************************************************************
+    private void showInternetDialog(String s) {
+        //RetrofitHelper.getInstance().showProgressDialog(this, s);
+        CustomDialog customDialog = new CustomDialog(this);
+        customDialog.setImage(R.drawable.ic_no_connection)
+                .setTitle("Information")
+                .setNegativeButtonVisible(View.VISIBLE)
+                .setNegativeButtonTitle("Ok")
+                .setDescription(s)
+                .setprogressBarVisible(View.GONE)
+                .setPositiveButtonVisible(View.GONE)
+                .setOnNegativeListener(new CustomDialog.negativeOnClick() {
+                    @Override
+                    public void onNegativePerformed() {
+                        customDialog.dismiss();
+                    }
+                });
+    }
+
+    //**********************************************************************************************
     private void dismissDialog() {
-        RetrofitHelper.getInstance().dismissProgressDialog();
+        // RetrofitHelper.getInstance().dismissProgressDialog();
+        if (customDialog != null)
+            customDialog.dismiss();
+
     }
 
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.alert_title_location_access)
-                        .setMessage(R.string.alert_content_location_access)
-                        .setPositiveButton("Ok", (dialogInterface, i) -> {
-                            //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    MY_PERMISSIONS_REQUEST_LOCATION);
-                        })
-                        .setNegativeButton("Cancel", (dialogInterface, i) -> {
-                            getAqiData();
-                        })
-                        .create()
-                        .show();
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-        }
-    }
-
+    //**********************************************************************************************
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -303,7 +329,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
+    //**********************************************************************************************
+    /**
+     * Get air quality data by passing latitude and longitude
+     *
+     * @param latitude
+     * @param longitude
+     */
     private void getAqiDataFromLatitudeLongitude(String latitude, String longitude) {
         try {
             String geo = "geo:" + latitude + ";" + longitude;
@@ -311,34 +343,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
                 if (status != null) {
                     if (status == Status.FETCHING) {
-                        showDialog("Loading data from nearest station...");
+                        showDialog(getResources().getString(R.string.loadingmain));
                     } else dismissDialog();
                 }
             });
             aqiViewModel.getGPSApiResponse(geo).observe(MainActivity.this, apiResponse -> {
                 if (apiResponse != null) {
                     try {
+                        apiFullResponse = String.valueOf(apiResponse);
                         Log.e("api", String.valueOf(apiResponse));
                         data = apiResponse.getData();
                         aqiTextView.setText(String.valueOf(data.getAqi()));
                         //TODO: Find better implementation
                         sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                        setAqiScaleGroup();
-                        WAQI waqi = data.getWaqi();
-                        if (waqi.getTemperature() != null)
-                            sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                            temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                        if (waqi.getPressure() != null)
-                            pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                        if (waqi.getHumidity() != null)
-                            humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                        if (waqi.getWind() != null)
-                            windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                        Common.setAQIScaleGroup(data, circleBackground, this);
+                        setWeatherInfo(latitude, longitude);
                         locationTextView.setText(data.getCity().getName());
-                        setupAttributions(data);
+                        //setupAttributions(data);
                         addPollutantsToList(data.getWaqi());
                         pollutantsAdapter.notifyDataSetChanged();
-                        updateWidget();
+                        Common.updateWidget(this);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -349,12 +373,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //**********************************************************************************************
+    private void setWeatherInfo(String lat, String lng) {
+
+        // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
+            /*
+            You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
+            */
+        retriever.updateCurrentWeatherInfo(Double.parseDouble(lat), Double.parseDouble(lng), new WeatherCallback() {
+            @Override
+            public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                // Your code here
+                //Toast.makeText(MainActivity.this, currentWeatherInfo.toString(), Toast.LENGTH_SHORT).show();
+                if (currentWeatherInfo != null) {
+                    //WAQI waqi = data.getWaqi();
+                    try {
+                        if (currentWeatherInfo.getCurrentTemperature() != null)
+                            sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                        if (currentWeatherInfo.getPressure() != null)
+                            pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
+                        if (currentWeatherInfo.getHumidity() != null)
+                            humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
+                        if (currentWeatherInfo.getWindSpeed() != null)
+                            windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
+
+                        Common.InserttoDB(MainActivity.this, data, lat, lng, apiFullResponse, currentWeatherInfo);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e("WeatherInfo-onFailure: ", error);
+            }
+        });
+
+    }
+
+    //**********************************************************************************************
+    /**
+     * Get air quality data by using network ip
+     */
     private void getAqiData() {
         try {
             aqiViewModel.getStatus().observe(MainActivity.this, status -> {
                 if (status != null) {
                     if (status == Status.FETCHING) {
-                        showDialog("Loading Information..Please wait..");
+                        showDialog(getResources().getString(R.string.loading));
                     } else dismissDialog();
                 }
             });
@@ -365,21 +437,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     aqiTextView.setText(String.valueOf(data.getAqi()));
                     //TODO: Find better implementation
                     sharedPrefUtils.saveLatestAQI(String.valueOf(data.getAqi()));
-                    setAqiScaleGroup();
-                    WAQI waqi = data.getWaqi();
-                    if (waqi.getTemperature() != null)
-                        temperatureTextView.setText(getString(R.string.temperature_unit_celsius, data.getWaqi().getTemperature().getV()));
-                    if (waqi.getPressure() != null)
-                        pressureTextView.setText(getString(R.string.pressure_unit, waqi.getPressure().getV()));
-                    if (waqi.getHumidity() != null)
-                        humidityTextView.setText(getString(R.string.humidity_unit, waqi.getHumidity().getV()));
-                    if (waqi.getWind() != null)
-                        windTextView.setText(getString(R.string.wind_unit, waqi.getWind().getV()));
+                    Common.setAQIScaleGroup(data, circleBackground, this);
+                    setWeatherInfo();
                     locationTextView.setText(data.getCity().getName());
-                   // setupAttributions(data);
+                    // setupAttributions(data);
                     addPollutantsToList(data.getWaqi());
                     pollutantsAdapter.notifyDataSetChanged();
-                    updateWidget();
+                    Common.updateWidget(this);
                 }
             });
         } catch (Exception e) {
@@ -387,20 +451,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void setupAttributions(Data data) {
-        int index = 1;
-        StringBuilder attributionText = new StringBuilder();
-        for (Attribution attribution : data.getAttributions()) {
-            attributionText.append(index++)
-                    .append(". ")
-                    .append(attribution.getName())
-                    .append("\n")
-                    .append(attribution.getUrl())
-                    .append("\n\n");
-        }
-        attributionTextView.setText(attributionText);
+
+    //**********************************************************************************************
+    private void setWeatherInfo() {
+
+        // Initialize OpenWeatherRetrieverZ by passing in  your openweathermap api key
+        OpenWeatherRetrieverZ retriever = new OpenWeatherRetrieverZ(Common.openWeatherKey);
+            /*
+            You can retrieve weather information with either OpenWeatherMap cityID or geolocation(Latitude, Logitude)
+            */
+        retriever.updateCurrentWeatherInfo(currentLatitude, currentLongitude, new WeatherCallback() {
+            @Override
+            public void onReceiveWeatherInfo(CurrentWeatherInfo currentWeatherInfo) {
+                // Your code here
+                //Toast.makeText(MainActivity.this, currentWeatherInfo.toString(), Toast.LENGTH_SHORT).show();
+
+                //WAQI waqi = data.getWaqi();
+                try {
+                    if (currentWeatherInfo.getCurrentTemperature() != null)
+                        sharedPrefUtils.saveLatestTemp(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                    temperatureTextView.setText(getString(R.string.temperature_unit_celsius, Double.parseDouble(currentWeatherInfo.getCurrentTemperature()) - Common.KelvinToCelcius));
+                    if (currentWeatherInfo.getPressure() != null)
+                        pressureTextView.setText(getString(R.string.pressure_unit, Double.parseDouble(currentWeatherInfo.getPressure())));
+                    if (currentWeatherInfo.getHumidity() != null)
+                        humidityTextView.setText(getString(R.string.humidity_unit, Double.parseDouble(currentWeatherInfo.getHumidity())));
+                    if (currentWeatherInfo.getWindSpeed() != null)
+                        windTextView.setText(getString(R.string.wind_unit, Double.parseDouble(currentWeatherInfo.getWindSpeed())));
+
+                    Common.InserttoDB(MainActivity.this, data, String.valueOf(currentLatitude), String.valueOf(currentLongitude), apiFullResponse, currentWeatherInfo);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(String error) {
+                // Your code here
+                Log.e("WeatherInfo-onFailure: ", error);
+            }
+        });
+
+
     }
 
+
+    //**********************************************************************************************
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -413,16 +510,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void updateWidget() {
-        Intent intent = new Intent(this, ALWidget.class);
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
-        // since it seems the onUpdate() is only fired on that:
-        int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), ALWidget.class));
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-        sendBroadcast(intent);
-    }
-
+    //**********************************************************************************************
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -448,8 +536,95 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sharedPrefUtils.isDarkMode(!sharedPrefUtils.isDarkMode());
                 recreate();
                 break;
+            case R.id.imgvw_favourite:
+
+                Common.callFavouriteDialog(MainActivity.this, currentLatitude, currentLongitude, locationTextView.getText().toString());
+
+                break;
+            case R.id.imgvw_favlist:
+                int count = Common.getFavouriteListCount(MainActivity.this);
+                if (count > 0) {
+                    startActivity(new Intent(this, ListFavActivity.class));
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.nolist), Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case R.id.btnstats:
+                count = Common.getFavouriteListCount(MainActivity.this);
+                if (count > 0) {
+                    startActivity(new Intent(this, MoreDetailedActivity.class));
+                } else {
+                    Toast.makeText(this, getResources().getString(R.string.nolist), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.imgvw_machinelarning:
+                Intent mIntent = new Intent(this, PredictionActivity.class);
+                Bundle extras = new Bundle();
+                extras.putDouble("latitude", currentLatitude);
+                extras.putDouble("longitude", currentLongitude);
+                mIntent.putExtras(extras);
+                startActivity(mIntent);
+                break;
+
+            case R.id.btnRefresh:
+                recreate();
+                Toast.makeText(this, getResources().getString(R.string.pleasewait), Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.btnLanguage:
+                if (Lingver.getInstance().getLanguage().equals(Common.defaultLanguage)) {//==en
+                    Lingver.getInstance().setLocale(this, Common.germanLanguage);
+                    Toast.makeText(this, getResources().getString(R.string.languageupdate), Toast.LENGTH_SHORT).show();
+                    sharedPrefUtils.saveLatestLanguage(Common.germanLanguage);
+                } else {
+                    Lingver.getInstance().setLocale(this, Common.defaultLanguage);
+                    sharedPrefUtils.saveLatestLanguage(Common.defaultLanguage);
+                    Toast.makeText(this, getResources().getString(R.string.languageupdate), Toast.LENGTH_SHORT).show();
+                }
+                recreate();
+
+                break;
+
             default:
                 break;
         }
     }
-}
+
+    //**********************************************************************************************
+    @Override
+    protected void onStop() {
+        super.onStop();
+        System.gc();
+    }
+
+    //**********************************************************************************************
+    @Override
+    public void onBackPressed() {
+
+        CustomDialog customDialog=new CustomDialog(this);
+        customDialog.setImage(R.drawable.ic_close_black_24dp)
+                .setTitle(getResources().getString(R.string.informationtitle))
+                .setNegativeButtonVisible(View.VISIBLE)
+                .setNegativeButtonTitle(getResources().getString(R.string.no))
+                .setPositiveButtonVisible(View.VISIBLE)
+                .setPossitiveButtonTitle(getString(R.string.yes))
+                .setDescription(getResources().getString(R.string.are_you_sure_want_to_exit))
+                .setprogressBarVisible(View.GONE)
+                .setOnPossitiveListener(new CustomDialog.possitiveOnClick() {
+                    @Override
+                    public void onPossitivePerformed() {
+                        finishAffinity();
+                        System.gc();
+                    }
+                })
+                .setOnNegativeListener(new CustomDialog.negativeOnClick() {
+                    @Override
+                    public void onNegativePerformed() {
+                        customDialog.dismiss();
+                    }
+                });
+    }
+
+    //**********************************************************************************************
+}//END

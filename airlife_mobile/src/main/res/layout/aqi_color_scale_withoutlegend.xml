@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <!-- images -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="horizontal"
+            android:weightSum="6">
+
+            <ImageView
+                android:id="@+id/scaleGood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_good" />
+
+            <ImageView
+                android:id="@+id/scaleModerate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_moderate" />
+
+            <ImageView
+                android:id="@+id/scaleUnhealthySensitive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_sensitive_unhealthy" />
+
+            <ImageView
+                android:id="@+id/scaleUnhealthy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_unhealthy" />
+
+            <ImageView
+                android:id="@+id/scaleVeryUnhealthy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_very_unhealthy" />
+
+            <ImageView
+                android:id="@+id/scaleHazardous"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/ic_smile_hazardous" />
+
+        </LinearLayout>
+
+        <View android:layout_width="match_parent"
+            android:layout_height="0.8dp"
+            android:background="#000"
+            android:layout_marginRight="5dp"
+            android:layout_marginLeft="5dp"
+            />
+        <!-- range -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="6">
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/good_range" />
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/moderate_range" />
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/unhealthy_for_sensitive_range" />
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/unhealthy_range" />
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/very_unhealthy_range" />
+
+            <TextView
+                style="@style/TextAQIScale2"
+                android:layout_width="0dp"               android:layout_marginRight="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/hazardous_range" />
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+
+    <!--  <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="64dp"
+          android:orientation="horizontal"
+          android:weightSum="6">
+
+          <TextView
+              android:id="@+id/scaleGood"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleGood"
+              android:text="@string/good" />
+
+          <TextView
+              android:id="@+id/scaleModerate"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleModerate"
+              android:text="@string/moderate" />
+
+          <TextView
+              android:id="@+id/scaleUnhealthySensitive"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleUnhealthySensitive"
+              android:text="@string/unhealthy_for_sensitive" />
+
+          <TextView
+              android:id="@+id/scaleUnhealthy"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleUnhealthy"
+              android:text="@string/unhealthy" />
+
+          <TextView
+              android:id="@+id/scaleVeryUnhealthy"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleVeryUnhealthy"
+              android:text="@string/very_unhealthy" />
+
+          <TextView
+              android:id="@+id/scaleHazardous"
+              style="@style/TextAQIScale"
+              android:layout_width="0dp"
+              android:layout_height="match_parent"
+              android:layout_weight="1"
+              android:background="@color/scaleHazardous"
+              android:text="@string/hazardous" />
+
+      </LinearLayout>-->
+
+
+</androidx.cardview.widget.CardView>

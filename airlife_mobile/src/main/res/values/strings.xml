@@ -17,7 +17,7 @@
     <string name="very_unhealthy_health_implications">Health warnings of emergency conditions. The entire population is more likely to be affected.</string>
     <string name="hazardous_health_implications">Health alert: everyone may experience more serious health effects.</string>
 
-    <string name="appwidget_text">AQI</string>
+    <string name="atppwidget_text">AQI</string>
 
     <!--AQI Range-->
     <string name="good_range">0 – 50</string>
@@ -40,6 +40,11 @@
     <string name="pressure_unit">%1$.1f mb</string>
     <string name="wind_unit">%1$.1f m/s</string>
 
+    <string name="temperature_unit_celsius_2">%1$.1f</string>
+    <string name="humidity_unit_2">%1$.0f</string>
+    <string name="pressure_unit_2">%1$.1f</string>
+    <string name="wind_unit_2">%1$.1f</string>
+
     <string name="place_holder">---</string>
     <string name="pressure">Pressure</string>
     <string name="humidity">Humidity</string>
@@ -48,5 +53,26 @@
     <string name="pollutants_aqi">Pollutants AQI</string>
     <string name="footer">Institute for Telecooperation,\nJKU, Linz</string>
     <string name="quotes">Prevention is better than cure</string>
+    <string name="delete">Delete</string>
 
+
+    <string name="msg_nonetworkconnection">Network not connected!!</string>
+    <string name="no_network_connection">No network available!!</string>
+    <string name="no_data_found">No data found..</string>
+    <string name="fav_loading_msg">Loading air quality for your favourite list...</string>
+    <string name="loadingmain">Loading data from nearest station...</string>
+    <string name="nolist">No list found..</string>
+    <string name="pleasewait">Please wait.. refreshing..</string>
+    <string name="languageupdate">Language updated to german</string>
+    <string name="loading">Loading Information..Please wait..</string>
+    <string name="favTitle">Air Life - Favourite List</string>
+    <string name="moreinfoTitle">Air Life - More Details</string>
+    <string name="predictionTitle">Air Life - Prediction</string>
+    <string name="predictsuccess">Predicted Successfully...</string>
+
+    <string name="are_you_sure_want_to_exit">Are you sure want to exit?</string>
+    <string name="exit">Exit</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="informationtitle">Information</string>
 </resources>

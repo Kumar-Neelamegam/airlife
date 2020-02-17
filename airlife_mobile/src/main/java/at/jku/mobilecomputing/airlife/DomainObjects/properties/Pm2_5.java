@@ -4,7 +4,7 @@ package at.jku.mobilecomputing.airlife.DomainObjects.properties;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Pm2_5 {
+public class Pm2_5   {
 
     @SerializedName("v")
     @Expose

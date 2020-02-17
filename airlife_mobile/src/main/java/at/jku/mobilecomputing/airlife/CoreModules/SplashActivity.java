@@ -1,29 +1,35 @@
 package at.jku.mobilecomputing.airlife.CoreModules;
 
 import android.animation.ObjectAnimator;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.animation.BounceInterpolator;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.github.ybq.android.spinkit.sprite.Sprite;
 import com.github.ybq.android.spinkit.style.Wave;
+import com.yariksoffice.lingver.Lingver;
 
-import at.jku.mobilecomputing.airlife.BuildConfig;
+import at.jku.mobilecomputing.airlife.Constants.Common;
 import at.jku.mobilecomputing.airlife.R;
 import at.jku.mobilecomputing.airlife.Utilities.SharedPrefUtils;
 
-public class SplashActivity  extends CoreActivity {
+/**
+ * Muthukumar Neelamegam
+ * Mobile Computing Project - JKU, Linz
+ * WS2020
+ * Adviser: Prof. Anna Karin Hummel
+ */
+public class SplashActivity extends CoreActivity {
 
     private static final long SPLASH_DURATION = 3000;
     SpinKitView spinKitView;
+    SharedPrefUtils sharedPrefUtils;
+
+    //**********************************************************************************************
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,10 +46,20 @@ public class SplashActivity  extends CoreActivity {
         }
 
     }
+
+    //**********************************************************************************************
     @Override
     public void onPermissionsGranted(int requestCode) {
 
         try {
+
+            Lingver.init(getApplication(), Common.defaultLanguage);
+
+            sharedPrefUtils = SharedPrefUtils.getInstance(this);
+            if (!sharedPrefUtils.getLatestLanguage().equals("")) {
+                Lingver.getInstance().setLocale(this, sharedPrefUtils.getLatestLanguage());   //set the saved language
+                sharedPrefUtils.saveLatestLanguage(sharedPrefUtils.getLatestLanguage());
+            }
 
             getInit();
 
@@ -55,12 +71,13 @@ public class SplashActivity  extends CoreActivity {
 
     }
 
+    //**********************************************************************************************
     private void getInit() {
 
-        spinKitView=findViewById(R.id.progressBar);
+        spinKitView = findViewById(R.id.progressBar);
         Sprite animate = new Wave();
         spinKitView.setIndeterminateDrawable(animate);
-        ImageView logo=findViewById(R.id.imageView);
+        ImageView logo = findViewById(R.id.imageView);
         doBounceAnimation(logo);
 
         new Handler().postDelayed(new Runnable() {
@@ -70,7 +87,10 @@ public class SplashActivity  extends CoreActivity {
             }
         }, SPLASH_DURATION);
 
+
     }
+
+    //**********************************************************************************************
     @Override
     protected void onResume() {
         super.onResume();
@@ -78,9 +98,10 @@ public class SplashActivity  extends CoreActivity {
 
     private void navigate() {
         startActivity(new Intent(SplashActivity.this, MainActivity.class));
-        finish();
+        finishAffinity();
     }
 
+    //**********************************************************************************************
     private void doBounceAnimation(View targetView) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(targetView, "translationY", 0, 100, 0);
         animator.setInterpolator(new BounceInterpolator());
@@ -89,29 +110,41 @@ public class SplashActivity  extends CoreActivity {
         animator.start();
     }
 
+    //**********************************************************************************************
     @Override
     public void onBackPressed() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void bindViews() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void setListeners() {
 
     }
 
+    //**********************************************************************************************
     @Override
     protected void onPause() {
         super.onPause();
     }
 
+    //**********************************************************************************************
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
+    //**********************************************************************************************
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    //**********************************************************************************************
 }

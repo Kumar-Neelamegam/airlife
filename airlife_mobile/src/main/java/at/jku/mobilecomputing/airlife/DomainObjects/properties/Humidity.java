@@ -3,7 +3,7 @@ package at.jku.mobilecomputing.airlife.DomainObjects.properties;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Humidity {
+public class Humidity   {
 
     @SerializedName("v")
     @Expose

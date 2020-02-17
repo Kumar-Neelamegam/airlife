@@ -3,10 +3,6 @@ package at.jku.mobilecomputing.airlife.Utilities;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.Set;
-
-import at.jku.mobilecomputing.airlife.DomainObjects.Data;
-
 import static android.content.Context.MODE_PRIVATE;
 
 public class SharedPrefUtils {
@@ -28,12 +24,12 @@ public class SharedPrefUtils {
 
     public void saveLatestAQI(String location) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("aqi", location);
+        editor.putString("Aqi", location);
         editor.apply();
     }
 
     public String getLatestAQI() {
-        return preferences.getString("aqi", "");
+        return preferences.getString("Aqi", "");
     }
 
 
@@ -45,6 +41,17 @@ public class SharedPrefUtils {
 
     public String getLatestTemp() {
         return preferences.getString("temperature", "");
+    }
+
+
+    public void saveLatestLanguage(String lang) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("language", lang);
+        editor.apply();
+    }
+
+    public String getLatestLanguage() {
+        return preferences.getString("language", "");
     }
 
 
